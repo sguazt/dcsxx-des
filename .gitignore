@@ -10,3 +10,15 @@
 *.lai
 *.la
 *.a
+
+# Generated files
+build
+config.mk
+config.sh.log
+inc/dcs/detail/config/*.hpp
+inc/dcs/detail/config.hpp
+inc/dcs/detail/version.hpp
+
+# Personal stuff
+tmp
+user-config.sh

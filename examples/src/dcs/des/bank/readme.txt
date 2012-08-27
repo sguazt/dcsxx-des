@@ -1,0 +1,2 @@
+Consider a bank with five tellers and one queue, which opens its doors at 9 A.M., closes its doors at 5 P.M., but stays open until all customers in the bank at 5 P.M. have been served.
+Assume that customers arrive with IID exponential interarrival times with mean 1 minute, that service times are IID exponential random variables with mean 4 minutes, and that customers are served in a first-in, first-out (FIFO) manner.
