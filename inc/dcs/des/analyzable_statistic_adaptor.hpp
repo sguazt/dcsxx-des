@@ -56,7 +56,7 @@ class analyzable_statistic_adaptor: public base_analyzable_statistic<
 								>::type adaptee_const_reference;
 
 
-	public: statistic_adaptor(adaptee_const_reference stat)
+	public: analyzable_statistic_adaptor(adaptee_const_reference stat)
 		: adaptee_(stat)
 	{
 		// Empty
@@ -166,10 +166,6 @@ class analyzable_statistic_adaptor: public base_analyzable_statistic<
 
 	private: adaptee_type adaptee_;
 };
-
-
-template <typename ValueT, typename UIntT>
-const UIntT base_analyzable_statistic<ValueT,UIntT>::num_observations_infinity = ::dcs::math::constants::infinity<UIntT>::value;
 
 }} // Namespace dcs::des
 
