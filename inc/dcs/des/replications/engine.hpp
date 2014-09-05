@@ -338,6 +338,14 @@ class engine: public ::dcs::des::engine<RealT>
 				::dcs::functional::placeholders::_2
 			)
 		);
+		ptr_meor_evt_src_->connect(
+			::dcs::functional::bind(
+				&self_type::process_maybe_end_of_replication,
+				this,
+				::dcs::functional::placeholders::_1,
+				::dcs::functional::placeholders::_2
+			)
+		);
 		ptr_eor_evt_src_->connect(
 			::dcs::functional::bind(
 				&self_type::process_end_of_replication,
@@ -365,7 +373,6 @@ class engine: public ::dcs::des::engine<RealT>
 			++repl_count_;
 
 			DCS_DEBUG_TRACE(">> Begin REPLICATION #" << repl_count_ << " - Simulation time: " << this->simulated_time() << " - Min Duration: " << min_repl_duration_);
-::std::cerr << ">> Begin REPLICATION #" << repl_count_ << " - Simulation time: " << this->simulated_time() << " - Min Duration: " << min_repl_duration_ << ::std::endl;//XXX
 
 			prepare_replication(ctx);
 
@@ -443,7 +450,6 @@ class engine: public ::dcs::des::engine<RealT>
 				}
 			}
 
-::std::cerr << ">> End REPLICATION #" << repl_count_ << " - Simulation time: " << this->simulated_time() << " - Min Duration: " << min_repl_duration_ << ::std::endl;//XXX
 			DCS_DEBUG_TRACE(">> End REPLICATION #" << repl_count_ << " - Simulation time: " << this->simulated_time());
 		}
 
@@ -615,7 +621,7 @@ template <typename RealT, typename UIntT>
 const RealT engine<RealT,UIntT>::default_min_repl_duration = RealT(1);
 
 
-namespace detail {
+namespace /*<unnamed>*/ { namespace detail {
 
 template <
 	typename TransientDetectorT,
@@ -629,7 +635,7 @@ struct output_analyzer
 	typedef NumReplicationsDetectorT num_replications_detector_type;
 };
 
-} // Namespace detail
+}} // Namespace <unnamed>::detail
 
 } // Namespace replications
 
