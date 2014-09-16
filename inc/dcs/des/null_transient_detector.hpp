@@ -29,13 +29,14 @@
 #define DCS_DES_NULL_TRANSIENT_DETECTOR_HPP
 
 
+#include <cstddef>
 #include <utility>
 #include <vector>
 
 
 namespace dcs { namespace des {
 
-template <typename RealT, typename UIntT>
+template <typename RealT, typename UIntT = std::size_t>
 class null_transient_detector
 {
 	public: typedef RealT real_type;

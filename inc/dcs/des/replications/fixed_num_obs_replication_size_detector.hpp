@@ -46,7 +46,7 @@ namespace dcs { namespace des { namespace replications {
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename RealT, typename UIntT>
+template <typename RealT, typename UIntT = std::size_t>
 class fixed_num_obs_replication_size_detector
 {
 	public: typedef RealT real_type;

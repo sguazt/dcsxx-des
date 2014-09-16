@@ -30,6 +30,7 @@
 
 
 #include <cmath>
+#include <cstddef>
 #include <cstdlib>
 #include <dcs/debug.hpp>
 #include <dcs/des/base_statistic.hpp>
@@ -48,7 +49,7 @@ namespace dcs { namespace des {
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename ValueT, typename UIntT>
+template <typename ValueT, typename UIntT = std::size_t>
 class mean_estimator: public base_statistic<ValueT,UIntT>
 {
 	private: typedef base_statistic<ValueT,UIntT> base_type;
@@ -57,11 +58,11 @@ class mean_estimator: public base_statistic<ValueT,UIntT>
 	public: typedef mean_statistic_category category_type;
 
 
-	public: explicit mean_estimator(value_type ci_level=base_type::default_confidence_level)
-	: count_(0),
+	public: explicit mean_estimator(value_type ci_level = base_type::default_confidence_level)
+	: base_type(ci_level),
+	  count_(0),
 	  m1_(0),
-	  m2_(0),
-	  ci_level_(ci_level)
+	  m2_(0)
 	{
 		// Empty
 	}
@@ -83,12 +84,6 @@ class mean_estimator: public base_statistic<ValueT,UIntT>
 	}
 
 
-	private: value_type do_confidence_level() const
-	{
-		return ci_level_;
-	}
-
-
 	private: value_type do_estimate() const
 	{
 		return m1_;
@@ -100,7 +95,7 @@ class mean_estimator: public base_statistic<ValueT,UIntT>
 		if (count_ > 1)
 		{
 			::dcs::math::stats::students_t_distribution<value_type> t_dist(count_-1);
-			value_type t = ::dcs::math::stats::quantile(t_dist, (value_type(1)+ci_level_)/value_type(2));
+			value_type t = ::dcs::math::stats::quantile(t_dist, (value_type(1)+this->confidence_level())/value_type(2));
 
 			//return ::std::sqrt(this->variance()/count_)*t;
 			return t*(this->standard_deviation()/::std::sqrt(count_));
@@ -162,8 +157,6 @@ class mean_estimator: public base_statistic<ValueT,UIntT>
 	private: value_type m1_;
 	/// Accumulator for the variance.
 	private: value_type m2_;
-	/// Confidence level for interval estimation.
-	private: value_type ci_level_;
 };
 
 

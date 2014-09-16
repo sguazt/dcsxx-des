@@ -56,10 +56,7 @@ namespace dcs { namespace des {
 
 namespace replications {
 
-template <
-	typename RealT,
-	typename UIntT
->
+template <typename RealT, typename UIntT = std::size_t>
 class engine: public ::dcs::des::engine<RealT>
 {
 	private: typedef ::dcs::des::engine<RealT> base_type;
