@@ -47,13 +47,16 @@ namespace dcs { namespace des { namespace replications {
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename RealT, typename UIntT, typename DesEngineT>
+template <typename RealT,
+		  typename UIntT = std::size_t,
+		  typename DesEngineT = dcs::des::engine<RealT> >
 class fixed_duration_replication_size_detector
 {
 	public: typedef RealT real_type;
 	public: typedef UIntT uint_type;
 	public: typedef DesEngineT des_engine_type;
-	public: typedef ::boost::shared_ptr<des_engine_type> des_engine_pointer;
+	//public: typedef ::boost::shared_ptr<des_engine_type> des_engine_pointer;
+	public: typedef des_engine_type* des_engine_pointer;
 	public: typedef ::std::pair<real_type,real_type> sample_type;
 	public: typedef ::std::vector<sample_type> vector_type;
 
@@ -64,13 +67,22 @@ class fixed_duration_replication_size_detector
 	 * \param time The time at which the detection must stop
 	 * \param ptr_engine A pointer to the simulator engine
 	 */
-	public: fixed_duration_replication_size_detector(real_type time, des_engine_pointer const& ptr_engine)
+	public: fixed_duration_replication_size_detector(real_type time,
+													 des_engine_type* ptr_engine)
 	: max_duration_(time),
 	  ptr_eng_(ptr_engine)
 	{
 		// empty
 	}
 
+	/// Deprecated
+	public: fixed_duration_replication_size_detector(real_type time,
+													 boost::shared_ptr<des_engine_type> const& ptr_engine)
+	: max_duration_(time),
+	  ptr_eng_(ptr_engine.get())
+	{
+		// empty
+	}
 
 	/**
 	 * \brief Accumulate a new observation.
