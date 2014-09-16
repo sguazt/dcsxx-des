@@ -29,9 +29,14 @@
 #define DCS_DES_BASE_ANALYZABLE_STATISTIC_HPP
 
 
+#include <cstddef>
+#include <dcs/assert.hpp>
 #include <dcs/des/base_statistic.hpp>
+#include <dcs/exception.hpp>
 #include <dcs/math/constants.hpp>
+#include <dcs/math/traits/float.hpp>
 #include <iostream>
+#include <stdexcept>
 
 
 namespace dcs { namespace des {
@@ -41,7 +46,7 @@ namespace dcs { namespace des {
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename ValueT, typename UIntT>
+template <typename ValueT, typename UIntT = std::size_t>
 class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
 {
 	public: typedef ValueT value_type;
@@ -49,8 +54,8 @@ class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
 	private: typedef base_statistic<value_type,uint_type> base_type;
 
 
-	/// Infinite number of observations.
-	public: static const uint_type num_observations_infinity;// = ::dcs::math::constants::infinity<uint_type>::value;
+	public: static const uint_type num_observations_infinity; ///< Constant to represent an infinite number of observations
+	public: static const value_type default_target_relative_precision; ///< Default target relative precision
 
 
 //	/// Default constructor
@@ -59,30 +64,44 @@ class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
 //	{
 //	}
 
+	protected: explicit base_analyzable_statistic(value_type relative_precision = default_target_relative_precision)
+	: target_rel_prec_(relative_precision)
+	{
+	}
 
 	// Compiler-generated copy-constructor/assignment are fine.
 
+	/// The destructor.
+	public: virtual ~base_analyzable_statistic() { }
 
-	/**
-	 * \brief Returns the wanted relative precision.
-	 * \return The wanted relative precision.
-	 */
+	/// Returns the wanted relative precision.
 	public: value_type target_relative_precision() const
 	{
-		return do_target_relative_precision();
+		return target_rel_prec_;
 	}
 
+	/// Returns the wanted relative precision.
+	public: void target_relative_precision(value_type v)
+	{
+		// pre: relative precision > 0
+		DCS_ASSERT(v > 0,
+				   DCS_EXCEPTION_THROW(std::invalid_argument, "Relative precision must be a positive number"));
 
-	/**
-	 * \brief Tells if the target precision has been reached.
-	 * \return \c true if the target precision has been reached; \c false
-	 *  otherwise.
-	 */
+		target_rel_prec_ = v;
+	}
+
+	/// Tells if the target precision has been reached.
 	public: bool target_precision_reached() const
 	{
-		return do_target_precision_reached();
-	}
+		if (std::isinf(this->target_relative_precision())
+			||
+			dcs::math::float_traits<value_type>::definitely_less_equal(this->relative_precision(), this->target_relative_precision()))
+		{
+			return true;
+		}
 
+		return false;
+	}
 
 //	/**
 //	 * \brief Tells if output analysis on this statistic has been enaabled.
@@ -98,7 +117,6 @@ class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
 //		return enabled_;
 //	}
 
-
 	/**
 	 * \brief Returns the maximum number of observations that can be analyzed.
 	 * \return The maximum number of analyzable observations.
@@ -108,13 +126,11 @@ class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
 		return do_max_num_observations();
 	}
 
-
 	/// Returns \c true if the statistic has entered its steady state.
 	public: bool steady_state_entered() const
 	{
 		return do_steady_state_entered();
 	}
-
 
 	/// Returns the length (in number of observations) of transient phase.
 	public: uint_type transient_phase_length() const
@@ -122,46 +138,35 @@ class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
 		return do_transient_phase_length();
 	}
 
-
 	public: value_type steady_state_enter_time() const
 	{
 		return steady_state_enter_time();
 	}
-
 
 	public: void steady_state_enter_time(value_type value)
 	{
 		do_steady_state_enter_time(value);
 	}
 
-
 	public: bool observation_complete() const
 	{
 		return do_observation_complete();
 	}
-
 
 	public: void initialize_for_experiment()
 	{
 		do_initialize_for_experiment();
 	}
 
-
 	public: void finalize_for_experiment()
 	{
 		do_finalize_for_experiment();
 	}
 
-
 	public: void refresh()
 	{
 		do_refresh();
 	}
-
-
-	/// The destructor.
-	public: virtual ~base_analyzable_statistic() { }
-
 
 	protected: virtual void do_initialize_for_experiment()
 	{
@@ -170,21 +175,6 @@ class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
 	protected: virtual void do_finalize_for_experiment()
 	{
 	}
-
-	/**
-	 * \brief Returns the wanted relative precision.
-	 * \return The wanted relative precision.
-	 */
-	private: virtual value_type do_target_relative_precision() const = 0;
-
-
-	/**
-	 * \brief Tells if the target precision has been reached.
-	 * \return \c true if the target precision has been reached; \c false
-	 *  otherwise.
-	 */
-	private: virtual bool do_target_precision_reached() const = 0;
-
 
 //	/**
 //	 * \brief Tells if output analysis on this statistic has been enabled.
@@ -259,11 +249,15 @@ class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
 
 
 //	private: bool enabled_;
+	private: value_type target_rel_prec_; ///< The relative precision to be reached
 }; // base_analyzable_statistic
 
 
 template <typename ValueT, typename UIntT>
 const UIntT base_analyzable_statistic<ValueT,UIntT>::num_observations_infinity = ::dcs::math::constants::infinity<UIntT>::value;
+
+template <typename ValueT, typename UIntT>
+const ValueT base_analyzable_statistic<ValueT,UIntT>::default_target_relative_precision = ::dcs::math::constants::infinity<ValueT>::value;
 
 }} // Namespace dcs::des
 

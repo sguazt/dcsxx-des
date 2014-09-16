@@ -79,62 +79,31 @@ class analyzable_statistic: public base_analyzable_statistic<
 	public: static const uint_type default_min_num_batches = 10;
 	public: static const bool default_use_schmeiser_rule = false;
 	public: static const uint_type default_schmeiser_rule_batch_size = 30;
-	public: static const value_type default_relative_precision;// = ::dcs::math::constants::infinity<value_type>::value;
 	public: static const uint_type default_max_num_obs;// = base_type::num_observations_infinity;
 	public: static const value_type default_half_width;// = ::dcs::math::constants::infinity<value_type>::value;
 
 
 	/// A constructor.
-	public: analyzable_statistic()
-		: stat_(),
-		  trans_detector_(),
-		  size_detector_(),
-		  target_rel_prec_(default_relative_precision),
-		  //ci_level_(default_confidence_level),
-		  ci_level_(stat_.confidence_level()),
-		  min_num_batches_(default_min_num_batches),
-		  max_num_obs_(default_max_num_obs),
-		  use_schmeiser_rule_(default_use_schmeiser_rule),
-		  k_b0_(default_schmeiser_rule_batch_size),
-		  rel_prec_(default_relative_precision),
-		  prec_reached_(false),
-		  count_(0),
-		  half_width_(default_half_width),
-		  trans_detected_(false),
-		  trans_len_(0),
-		  batch_size_detected_(false),
-		  batch_size_(0),
-//		  batch_mean_(0),
-		  steady_start_time_(0)
+	public: explicit analyzable_statistic(value_type relative_precision = base_type::default_target_relative_precision,
+										  uint_type max_num_obs=default_max_num_obs,
+										  uint_type min_num_batches=default_min_num_batches)
+	: base_type(relative_precision),
+	  stat_(),
+	  trans_detector_(),
+	  size_detector_(),
+	  min_num_batches_(min_num_batches),
+	  max_num_obs_(max_num_obs),
+	  use_schmeiser_rule_(default_use_schmeiser_rule),
+	  k_b0_(default_schmeiser_rule_batch_size),
+	  //rel_prec_(default_relative_precision),
+	  count_(0),
+	  half_width_(default_half_width),
+	  trans_detected_(false),
+	  trans_len_(0),
+	  batch_size_detected_(false),
+	  batch_size_(0),
+	  steady_start_time_(0)
 	{
-		// Empty
-	}
-
-
-	/// A constructor.
-	public: analyzable_statistic(value_type relative_precision, /*value_type confidence_level=default_confidence_level,*/ uint_type max_num_obs=default_max_num_obs, uint_type min_num_batches=default_min_num_batches)
-		: stat_(),
-		  trans_detector_(),
-		  size_detector_(),
-		  target_rel_prec_(relative_precision),
-		  //ci_level_(confidence_level),
-		  ci_level_(stat_.confidence_level()),
-		  min_num_batches_(min_num_batches),
-		  max_num_obs_(max_num_obs),
-		  use_schmeiser_rule_(default_use_schmeiser_rule),
-		  k_b0_(default_schmeiser_rule_batch_size),
-		  rel_prec_(default_relative_precision),
-		  prec_reached_(false),
-		  count_(0),
-		  half_width_(default_half_width),
-		  trans_detected_(false),
-		  trans_len_(0),
-		  batch_size_detected_(false),
-		  batch_size_(0),
-//		  batch_mean_(0),
-		  steady_start_time_(0)
-	{
-		// Empty
 	}
 
 
@@ -151,29 +120,29 @@ class analyzable_statistic: public base_analyzable_statistic<
 	 * \param min_num_batches The minimum number of batches to collect before
 	 *  checking for relative precision.
 	 */
-	public: analyzable_statistic(statistic_type const& stat, transient_phase_detector_type const& transient_detector, batch_size_detector_type const& size_detector, value_type relative_precision=default_relative_precision, /*value_type confidence_level=default_confidence_level,*/ uint_type max_num_obs=default_max_num_obs, uint_type min_num_batches=default_min_num_batches)
-		: stat_(stat),
-		  trans_detector_(transient_detector),
-		  size_detector_(size_detector),
-		  target_rel_prec_(relative_precision),
-		  //ci_level_(confidence_level),
-		  ci_level_(stat_.confidence_level()),
-		  min_num_batches_(min_num_batches),
-		  max_num_obs_(max_num_obs),
-		  use_schmeiser_rule_(default_use_schmeiser_rule),
-		  k_b0_(default_schmeiser_rule_batch_size),
-		  rel_prec_(default_relative_precision),
-		  prec_reached_(false),
-		  count_(0),
-		  half_width_(default_half_width),
-		  trans_detected_(false),
-		  trans_len_(0),
-		  batch_size_detected_(false),
-		  batch_size_(0),
-//		  batch_mean_(0),
-		  steady_start_time_(0)
+	public: analyzable_statistic(statistic_type const& stat,
+								 transient_phase_detector_type const& transient_detector,
+								 batch_size_detector_type const& size_detector,
+								 value_type relative_precision = base_type::default_target_relative_precision,
+								 uint_type max_num_obs = default_max_num_obs,
+								 uint_type min_num_batches =  default_min_num_batches)
+	: base_type(relative_precision),
+	  stat_(stat),
+	  trans_detector_(transient_detector),
+	  size_detector_(size_detector),
+	  min_num_batches_(min_num_batches),
+	  max_num_obs_(max_num_obs),
+	  use_schmeiser_rule_(default_use_schmeiser_rule),
+	  k_b0_(default_schmeiser_rule_batch_size),
+	  //rel_prec_(default_relative_precision),
+	  count_(0),
+	  half_width_(default_half_width),
+	  trans_detected_(false),
+	  trans_len_(0),
+	  batch_size_detected_(false),
+	  batch_size_(0),
+	  steady_start_time_(0)
 	{
-		// Empty
 	}
 
 
@@ -379,9 +348,8 @@ class analyzable_statistic: public base_analyzable_statistic<
 
 		this->enable(true);
 
-		prec_reached_ = trans_detected_
-					  = batch_size_detected_
-					  = false;
+		trans_detected_ = batch_size_detected_
+					    = false;
 
 		count_ = trans_len_
 			   = batch_size_
@@ -444,24 +412,6 @@ class analyzable_statistic: public base_analyzable_statistic<
 	}
 
 
-	private: value_type do_confidence_level() const
-	{
-		return ci_level_;
-	}
-
-
-	private: value_type do_target_relative_precision() const
-	{
-		return target_rel_prec_;
-	}
-
-
-	private: bool do_target_precision_reached() const
-	{
-		return prec_reached_;
-	}
-
-
 	private: uint_type do_max_num_observations() const
 	{
 		return max_num_obs_;
@@ -520,7 +470,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 			::dcs::math::stats::students_t_distribution<value_type> t_dist(num_batches()-1);
 
 			half_width_ = this->standard_deviation()
-						* ::dcs::math::stats::quantile(t_dist, (value_type(1)+ci_level_)/value_type(2));
+						* ::dcs::math::stats::quantile(t_dist, (value_type(1)+this->confidence_level())/value_type(2));
 
 			// Compute the relative precision
 			// Note: the requirements that the estimate is different from zero
@@ -541,26 +491,23 @@ class analyzable_statistic: public base_analyzable_statistic<
 		}
 
 #ifdef DCS_DEBUG
-		if (rel_prec_ <= target_rel_prec_)
+		if (rel_prec_ <= this->target_relative_precision())
 		{
-			DCS_DEBUG_TRACE("[Batch #" << num_batches() << "] Detected precision: mean = " << this->estimate() << " - reached precision = " << rel_prec_ << " - target precision: " << target_rel_prec_); 
+			DCS_DEBUG_TRACE("[Batch #" << num_batches() << "] Detected precision: mean = " << this->estimate() << " - reached precision = " << rel_prec_ << " - target precision: " << this->target_relative_precision()); 
 		}
 		else
 		{
-			DCS_DEBUG_TRACE("[Batch #" << num_batches() << "] Failed to detect precision: mean = " << this->estimate() << " - reached precision = " << rel_prec_ << " - target precision: " << target_rel_prec_); 
+			DCS_DEBUG_TRACE("[Batch #" << num_batches() << "] Failed to detect precision: mean = " << this->estimate() << " - reached precision = " << rel_prec_ << " - target precision: " << this->target_relative_precision()); 
 		}
 #endif // DCS_DEBUG
 
-		prec_reached_ = ::std::isinf(target_rel_prec_)
-						||
-						::dcs::math::float_traits<value_type>::definitely_less_equal(rel_prec_, target_rel_prec_);
+		bool prec_reached = this->target_precision_reached();
 
 		/// This applies the recommendations found in (Schmeiser,1982)
-		if (
-			!prec_reached_
+		if (!prec_reached
 			&& use_schmeiser_rule_
-			&& (k_b0_ > 0)
-		) {
+			&& (k_b0_ > 0))
+		{
 			batch_means_.push_back(batch_mean);
 
 			if ((num_batches() % k_b0_) == 0)
@@ -599,7 +546,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 
 					::dcs::math::stats::students_t_distribution<value_type> t_dist(k_b0_-1);
 					half_width_ = grand_sd
-								* ::dcs::math::stats::quantile(t_dist, (value_type(1)+ci_level_)/value_type(2));
+								* ::dcs::math::stats::quantile(t_dist, (value_type(1)+this->confidence_level())/value_type(2));
 					// Recompute precision and check again
 					if (grand_mean != 0)
 					{
@@ -612,17 +559,15 @@ class analyzable_statistic: public base_analyzable_statistic<
 					}
 				}
 
-				prec_reached_ = ::std::isinf(target_rel_prec_)
-								||
-								::dcs::math::float_traits<value_type>::definitely_less_equal(rel_prec_, target_rel_prec_);
+				bool prec_reached = this->target_precision_reached();
 #ifdef DCS_DEBUG
-				if (prec_reached_)
+				if (prec_reached)
 				{
-					DCS_DEBUG_TRACE("[Batch #" << k_be << "] Detected precision through Schmeiser trick: grand mean = " << grand_mean << " - reached precision = " << rel_prec_ << " - target precision: " << target_rel_prec_); 
+					DCS_DEBUG_TRACE("[Batch #" << k_be << "] Detected precision through Schmeiser trick: grand mean = " << grand_mean << " - reached precision = " << rel_prec_ << " - target precision: " << this->target_relative_precision()); 
 				}
 				else
 				{
-					DCS_DEBUG_TRACE("[Batch #" << k_be << "] Failed to detect precision through Schmeiser trick: grand mean = " << grand_mean << " - reached precision = " << rel_prec_ << " - target precision: " << target_rel_prec_); 
+					DCS_DEBUG_TRACE("[Batch #" << k_be << "] Failed to detect precision through Schmeiser trick: grand mean = " << grand_mean << " - reached precision = " << rel_prec_ << " - target precision: " << this->target_relative_precision()); 
 				}
 #endif // DCS_DEBUG
 			}
@@ -640,16 +585,12 @@ class analyzable_statistic: public base_analyzable_statistic<
 	private: transient_phase_detector_type trans_detector_;
 	private: batch_size_detector_type size_detector_;
 	/// The target relative precision
-	private: /*const*/ value_type target_rel_prec_;
-	private: /*const*/ value_type ci_level_;
 	private: /*const*/ uint_type min_num_batches_;
 	private: /*const*/ uint_type max_num_obs_;
 	private: /*const*/ bool use_schmeiser_rule_;
 	private: /*const*/ uint_type k_b0_;
 	/// The reached relative precision
 	private: value_type rel_prec_;
-	/// Tells if the target relative precision has been reached.
-	private: bool prec_reached_;
 	/// The total number of observations (this is different from the number of
 	/// batch means).
 	private: uint_type count_;
@@ -664,20 +605,6 @@ class analyzable_statistic: public base_analyzable_statistic<
 	private: ::std::vector<value_type> batch_means_;
 	private: value_type steady_start_time_;
 };
-
-template <
-	typename StatisticT,
-	typename TransientDetectorT,
-	typename BatchSizeDetectorT
->
-const typename StatisticT::value_type analyzable_statistic<StatisticT,TransientDetectorT,BatchSizeDetectorT>::default_confidence_level = base_statistic<typename StatisticT::value_type, typename StatisticT::uint_type>::default_confidence_level;
-
-template <
-	typename StatisticT,
-	typename TransientDetectorT,
-	typename BatchSizeDetectorT
->
-const typename StatisticT::value_type analyzable_statistic<StatisticT,TransientDetectorT,BatchSizeDetectorT>::default_relative_precision = ::dcs::math::constants::infinity<typename StatisticT::value_type>::value;
 
 template <
 	typename StatisticT,

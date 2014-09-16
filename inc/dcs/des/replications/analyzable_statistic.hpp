@@ -91,31 +91,22 @@ class analyzable_statistic: public base_analyzable_statistic<
 	private: typedef typename ::dcs::des::engine_traits<engine_type>::engine_context_type engine_context_type;
 
 
-	public: static const value_type default_confidence_level;// = 0.95;
-	public: static const uint_type default_min_num_repl = 2;
-	public: static const value_type default_relative_precision;// = ::dcs::math::constants::infinity<value_type>::value;
-	public: static const uint_type default_max_num_obs;// = base_type::num_observations_infinity;
-	public: static const value_type default_half_width;// = ::dcs::math::constants::infinity<value_type>::value;
+//	public: static const value_type default_confidence_level; ///< Default value for the confidence level
+	public: static const uint_type default_min_num_repl = 2; ///< Default value for the minimum number of replications
+	public: static const uint_type default_max_num_obs; ///< Default value for the maximum number of observations
 
 
 	/// A constructor.
-	public: explicit analyzable_statistic(value_type relative_precision=default_relative_precision,
-										  uint_type max_num_obs=default_max_num_obs,
-										  uint_type min_num_repl=default_min_num_repl)
-		: base_type(),
+	public: explicit analyzable_statistic(value_type relative_precision = base_type::default_target_relative_precision,
+										  uint_type max_num_obs = default_max_num_obs,
+										  uint_type min_num_repl = default_min_num_repl)
+		: base_type(relative_precision),
 		  stat_(),
 		  trans_detector_(),
 		  repl_size_detector_(),
 		  num_repl_detector_(),
-		  //target_rel_prec_(default_relative_precision),
-		  target_rel_prec_(relative_precision),
-		  ci_level_(stat_.confidence_level()),
-		  //min_num_repl_(default_min_num_repl),
 		  min_num_repl_(min_num_repl),
-		  //max_num_obs_(default_max_num_obs),
 		  max_num_obs_(max_num_obs),
-//		  rel_prec_(default_relative_precision),
-		  prec_reached_(false),
 		  trans_detected_(false),
 		  trans_len_(0),
 		  repl_size_detected_(false),
@@ -126,50 +117,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 		  steady_start_time_(0)
 	{
 		// Empty
-//::std::cerr << "[replications::analyzable_statistic] (" << this << ") CREATE STAT: " << this->name() << ::std::endl;///XXX
 	}
-
-
-//	/// A constructor.
-//	public: template <typename RealT, typename UIntT>
-//		analyzable_statistic(::dcs::des::replications::engine<RealT,UIntT>& eng,
-//							 value_type relative_precision=default_relative_precision,
-//							 uint_type max_num_obs=default_max_num_obs,
-//							 uint_type min_num_repl=default_min_num_repl)
-//		: base_type(),
-//		  stat_(),
-//		  trans_detector_(),
-//		  repl_size_detector_(),
-//		  num_repl_detector_(),
-//		  target_rel_prec_(relative_precision),
-//		  ci_level_(stat_.confidence_level()),
-//		  min_num_repl_(min_num_repl),
-//		  max_num_obs_(max_num_obs),
-////		  rel_prec_(default_relative_precision),
-//		  prec_reached_(false),
-//		  trans_detected_(false),
-//		  trans_len_(0),
-//		  repl_size_detected_(false),
-//		  repl_size_(0),
-//		  num_repl_detected_(false),
-//		  num_repl_(0),
-//		  repl_mean_stat_(),
-//		  steady_start_time_(0)
-//	{
-//		// pre: relative precision >= 0
-//		DCS_ASSERT(
-//			relative_precision >= 0,
-//			throw ::std::invalid_argument("[dcs::des::replications::analyzable_statistic::ctor] Relative precision must be >= 0.")
-//		);
-//		// pre: min number of replications >= 2
-//		DCS_ASSERT(
-//			min_num_repl_ >= 2,
-//			throw ::std::invalid_argument("[dcs::des::replications::analyzable_statistic::ctor] Number of replications must >= 2.")
-//		);
-//
-////		register_event_handlers(eng);
-//	}
-
 
 	/**
 	 * \brief A constructor.
@@ -192,21 +140,16 @@ class analyzable_statistic: public base_analyzable_statistic<
 							 replication_size_detector_type const& repl_size_detector,
 							 num_replications_detector_type const& num_repl_detector,
 							 ::dcs::des::replications::engine<RealT,UIntT>& eng,
-							 value_type relative_precision=default_relative_precision,
-							 //value_type confidence_level=default_confidence_level,
-							 uint_type max_num_obs=default_max_num_obs,
-							 uint_type min_num_repl=default_min_num_repl)
-		: base_type(),
+							 value_type relative_precision = base_type::default_target_relative_precision,
+							 uint_type max_num_obs = default_max_num_obs,
+							 uint_type min_num_repl = default_min_num_repl)
+		: base_type(relative_precision),
 		  stat_(stat),
 		  trans_detector_(transient_detector),
 		  repl_size_detector_(repl_size_detector),
 		  num_repl_detector_(num_repl_detector),
-		  target_rel_prec_(relative_precision),
-		  ci_level_(stat_.confidence_level()),
 		  min_num_repl_(min_num_repl),
 		  max_num_obs_(max_num_obs),
-//		  rel_prec_(default_relative_precision),
-		  prec_reached_(false),
 		  trans_detected_(false),
 		  trans_len_(0),
 		  repl_size_detected_(false),
@@ -218,105 +161,52 @@ class analyzable_statistic: public base_analyzable_statistic<
 	{
 		DCS_MACRO_SUPPRESS_UNUSED_VARIABLE_WARNING(eng);
 
-		// pre: relative precision >= 0
-		DCS_ASSERT(
-			relative_precision >= 0,
-			throw ::std::invalid_argument("[dcs::des::replications::analyzable_statistic::ctor] Relative precision must be >= 0.")
-		);
 		// pre: min number of replications >= 2
 		DCS_ASSERT(
 			min_num_repl_ >= 2,
 			throw ::std::invalid_argument("[dcs::des::replications::analyzable_statistic::ctor] Number of replications must be >= 2.")
 		);
-
-//		register_event_handlers(eng);
-//::std::cerr << "[replications::analyzable_statistic] (" << this << ") CREATE STAT: " << this->name() << ::std::endl;///XXX
 	}
-
-
-//	public: ~analyzable_statistic()
-//	{
-//		deregister_event_handlers(eng);
-//	}
-
 
 	public: uint_type actual_num_replications() const
 	{
 		return repl_mean_stat_.num_observations();
 	}
 
-
 	public: uint_type actual_replication_size() const
 	{
 		return stat_.num_observations();
 	}
-
 
 //	public: bool num_replications_detected() const
 //	{
 //		return num_repl_detected_;
 //	}
 
-
 	public: uint_type num_replications() const
 	{
 		return num_repl_;
 	}
-
 
 	public: bool replication_done() const
 	{
 		return repl_size_detected_ && actual_replication_size() >= replication_size();
 	}
 
-
 	public: uint_type replication_size() const
 	{
 		return repl_size_;
 	}
-
-
-//	private: template <typename RealT, typename UIntT>
-//		void register_event_handlers(::dcs::des::replications::engine<RealT,UIntT>& eng)
-//	{
-//		eng.begin_of_sim_event_source().connect(
-//			::dcs::functional::bind(
-//				&self_type::process_begin_of_sim,
-//				this,
-//				::dcs::functional::placeholders::_1,
-//				::dcs::functional::placeholders::_2
-//			)
-//		);
-//		eng.begin_of_replication_event_source().connect(
-//			::dcs::functional::bind(
-//				&self_type::process_begin_of_replication,
-//				this,
-//				::dcs::functional::placeholders::_1,
-//				::dcs::functional::placeholders::_2
-//			)
-//		);
-//		eng.end_of_replication_event_source().connect(
-//			::dcs::functional::bind(
-//				&self_type::process_end_of_replication,
-//				this,
-//				::dcs::functional::placeholders::_1,
-//				::dcs::functional::placeholders::_2
-//			)
-//		);
-//	}
-
 
 	protected: void do_initialize_for_experiment()
 	{
 		reset_for_replication();
 	}
 
-
 	protected: void do_finalize_for_experiment()
 	{
 		do_estimate(stat_.estimate());
 	}
-
 
 	private: void reset_for_replication()
 	{
@@ -356,7 +246,6 @@ class analyzable_statistic: public base_analyzable_statistic<
 
 		DCS_DEBUG_TRACE("(" << this << ") END Reset for Replication");
 	}
-
 
 	//@{ Event handlers
 
@@ -464,54 +353,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 
 			repl_size_detected_ = repl_size_detector_.detect(obs, weight);
 
-			replication_size_detection();
-/*
-			if (repl_size_detected_)
-			{
-				repl_size_ = repl_size_detector_.estimated_size();
-
-				DCS_DEBUG_TRACE("(" << this << ") Detected replication size. Taking back " << repl_size_detector_.consumed_observations().size() << " observations consumed during replication size detection.");
-
-				// Replication size just detected.
-				// Takes all of the replicate means computed during the
-				// replication size detection.
-
-				typedef typename replication_size_detector_type::vector_type vector_type;
-				typedef typename vector_type::const_iterator vector_iterator_type;
-
-				vector_type obss = repl_size_detector_.consumed_observations();
-				vector_iterator_type obss_end = obss.end();
-
-				for (
-					vector_iterator_type it = obss.begin();
-					it != obss_end;
-					++it
-				) {
-					// Recursively call this method in order to collect
-					// observations for replication size detection or for
-					// sample accumulation
-					this->operator()(*it);
-				}
-
-				DCS_DEBUG_TRACE("(" << this << ") Already consumed observations means took back.");
-
-				// Reset replication size detector to save memory
-				repl_size_detector_.reset();
-
-//					// Adjust max number of observation so that to take the
-//					// minimum between the value set by the user and the value
-//					// obtained from replication size detector.
-//					max_num_obs_ = ::std::min(max_num_obs_, repl_size_);
-			}
-			else if (repl_size_detector_.aborted())
-			{
-				DCS_DEBUG_TRACE("(" << this << ") Replication size detection has been aborted. Disabling statistical analysis.");
-
-				::std::clog << "[Warning] Statistic '" << *this << "' will be disabled: replication size detection has been aborted." << ::std::endl;
-
-				this->enable(false);
-			}
-*/
+			this->replication_size_detection();
 		}
 		else
 		{
@@ -521,49 +363,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 
 			trans_detected_ = trans_detector_.detect(obs, weight);
 
-			transient_detection();
-/*
-			if (trans_detected_)
-			{
-				trans_len_ = trans_detector_.estimated_size();
-
-				DCS_DEBUG_TRACE("(" << this << ") Detected transient phase. Putting-back " << trans_detector_.steady_state_observations().size() << " safe steady-state observations.");
-
-				// Transient phase just detected
-				// Put back steady-state observations possibly used for
-				// transient phase detection
-				typedef typename transient_phase_detector_type::vector_type vector_type;
-				typedef typename vector_type::const_iterator vector_iterator_type;
-
-				vector_type obss = trans_detector_.steady_state_observations();
-				vector_iterator_type obss_end = obss.end();
-
-				for (
-					vector_iterator_type it = obss.begin();
-					it != obss_end;
-					++it
-				) {
-					// Recursively call this method in order to collect
-					// observations for replication size detection or for
-					// sample accumulation
-					this->operator()(*it);
-				}
-
-				DCS_DEBUG_TRACE("(" << this << ") Safe steady-state observations put back.");
-
-				// Reset transient detector to save memory
-				trans_detector_.reset();
-			}
-			else if (trans_detector_.aborted())
-			{
-//				throw ::std::runtime_error("Transient phase is done but transient period not detected.");
-//				DCS_DEBUG_TRACE("(" << this << ") Transient phase detection has been aborted. Disabling statistical analysis.");
-
-				::std::clog << "[Warning] Statistic '" << *this << "' will be disabled: Transient phase detection has been aborted." << ::std::endl;
-
-				this->enable(false);
-			}
-*/
+			this->transient_detection();
 		}
 
 		DCS_DEBUG_TRACE("(" << this << ") END Collecting observation " << obs << " - weight: " << weight);
@@ -653,11 +453,10 @@ class analyzable_statistic: public base_analyzable_statistic<
 			vector_type obss = repl_size_detector_.consumed_observations();
 			vector_iterator_type obss_end = obss.end();
 
-			for (
-				vector_iterator_type it = obss.begin();
+			for (vector_iterator_type it = obss.begin();
 				it != obss_end;
-				++it
-			) {
+				++it)
+			{
 				// Recursively call this method in order to collect
 				// observations for replication size detection or for
 				// sample accumulation
@@ -685,12 +484,6 @@ class analyzable_statistic: public base_analyzable_statistic<
 	}
 
 
-	private: value_type do_confidence_level() const
-	{
-		return ci_level_;
-	}
-
-
 	private: value_type do_estimate() const
 	{
 		return repl_mean_stat_.estimate();
@@ -710,16 +503,16 @@ class analyzable_statistic: public base_analyzable_statistic<
 			<< " (r.e. " << this->relative_precision()*100 << "%)"
 		);
 
+		bool prec_reached = false;
+
 		if (num_repl_detected_
 			&& actual_num_replications() >= num_repl_)
 		{
-			prec_reached_ = ::std::isinf(target_rel_prec_)
-							||
-							::dcs::math::float_traits<value_type>::definitely_less_equal(this->relative_precision(), target_rel_prec_);
+			prec_reached = this->target_precision_reached();
 		}
 
 		if (!num_repl_detected_
-			|| (actual_num_replications() >= num_repl_ && !prec_reached_))
+			|| (actual_num_replications() >= num_repl_ && !prec_reached))
 		{
 			// Number of replications is still to be detected...
 			// ... Or need to redetect since, after having performed the
@@ -740,7 +533,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 					num_repl_ = ::std::max(num_repl_detector_.estimated_number(), min_num_repl_);
 				}
 				else if (num_repl_ <= this->actual_num_replications()
-						 && !prec_reached_)
+						 && !prec_reached)
 				{
 					// Ooops! The new detected number of replications is the
 					// same of or greater than the one previously detected
@@ -766,16 +559,16 @@ class analyzable_statistic: public base_analyzable_statistic<
 		}
 
 #ifdef DCS_DEBUG
-		//if (this->relative_precision() <= target_rel_prec_)
-		if (prec_reached_)
+		//if (this->relative_precision() <= this->target_relative_precision())
+		if (prec_reached)
 		{
-			DCS_DEBUG_TRACE("(" << this << ") [Replication #" << this->actual_num_replications() << "] Detected precision: mean = " << this->estimate() << " - reached precision = " << this->relative_precision() << " - target precision: " << target_rel_prec_); 
+			DCS_DEBUG_TRACE("(" << this << ") [Replication #" << this->actual_num_replications() << "] Detected precision: mean = " << this->estimate() << " - reached precision = " << this->relative_precision() << " - target precision: " << this->target_relative_precision()); 
 		}
 		else
 		{
 			if (this->actual_num_replications() >= num_repl_)
 			{
-				DCS_DEBUG_TRACE("(" << this << ") [Replication #" << this->actual_num_replications() << "] Failed to detect precision: mean = " << this->estimate() << " - reached precision = " << this->relative_precision() << " - target precision: " << target_rel_prec_); 
+				DCS_DEBUG_TRACE("(" << this << ") [Replication #" << this->actual_num_replications() << "] Failed to detect precision: mean = " << this->estimate() << " - reached precision = " << this->relative_precision() << " - target precision: " << this->target_relative_precision()); 
 			}
 			else
 			{
@@ -840,7 +633,6 @@ class analyzable_statistic: public base_analyzable_statistic<
 			num_repl_ = ::std::max(min_num_repl_, num_repl_detector_.estimated_number());
 		}
 		this->enable(true);
-		prec_reached_ = ::std::isinf(target_rel_prec_);
 	}
 
 
@@ -860,19 +652,6 @@ class analyzable_statistic: public base_analyzable_statistic<
 	{
 		steady_start_time_ = value;
 	}
-
-
-	private: bool do_target_precision_reached() const
-	{
-		return prec_reached_;
-	}
-
-
-	private: value_type do_target_relative_precision() const
-	{
-		return target_rel_prec_;
-	}
-
 
 	private: bool do_transient_phase_detected() const
 	{
@@ -942,14 +721,10 @@ class analyzable_statistic: public base_analyzable_statistic<
 	private: replication_size_detector_type repl_size_detector_;
 	private: num_replications_detector_type num_repl_detector_;
 	/// The target relative precision
-	private: /*const*/ value_type target_rel_prec_;
-	private: /*const*/ value_type ci_level_;
 	private: /*const*/ uint_type min_num_repl_;
 	private: /*const*/ uint_type max_num_obs_;
 //	/// The reached relative precision
 //	private: value_type rel_prec_;
-	/// Tells if the target relative precision has been reached.
-	private: bool prec_reached_;
 	private: bool trans_detected_;
 	private: uint_type trans_len_;
 	private: bool repl_size_detected_;
@@ -965,21 +740,13 @@ class analyzable_statistic: public base_analyzable_statistic<
 };
 
 
-template <
-	typename StatisticT,
-	typename TransientDetectorT,
-	typename ReplicationSizeDetectorT,
-	typename NumReplicationsDetectorT
->
-const typename StatisticT::value_type analyzable_statistic<StatisticT,TransientDetectorT,ReplicationSizeDetectorT,NumReplicationsDetectorT>::default_confidence_level = base_statistic<typename StatisticT::value_type, typename StatisticT::uint_type>::default_confidence_level;
-
-template <
-	typename StatisticT,
-	typename TransientDetectorT,
-	typename ReplicationSizeDetectorT,
-	typename NumReplicationsDetectorT
->
-const typename StatisticT::value_type analyzable_statistic<StatisticT,TransientDetectorT,ReplicationSizeDetectorT,NumReplicationsDetectorT>::default_relative_precision = ::dcs::math::constants::infinity<typename StatisticT::value_type>::value;
+//template <
+//	typename StatisticT,
+//	typename TransientDetectorT,
+//	typename ReplicationSizeDetectorT,
+//	typename NumReplicationsDetectorT
+//>
+//const typename StatisticT::value_type analyzable_statistic<StatisticT,TransientDetectorT,ReplicationSizeDetectorT,NumReplicationsDetectorT>::default_confidence_level = base_statistic<typename StatisticT::value_type, typename StatisticT::uint_type>::default_confidence_level;
 
 template <
 	typename StatisticT,
@@ -988,14 +755,6 @@ template <
 	typename NumReplicationsDetectorT
 >
 const typename StatisticT::uint_type analyzable_statistic<StatisticT,TransientDetectorT,ReplicationSizeDetectorT,NumReplicationsDetectorT>::default_max_num_obs = base_analyzable_statistic<typename StatisticT::value_type,typename StatisticT::uint_type>::num_observations_infinity;
-
-template <
-	typename StatisticT,
-	typename TransientDetectorT,
-	typename ReplicationSizeDetectorT,
-	typename NumReplicationsDetectorT
->
-const typename StatisticT::value_type analyzable_statistic<StatisticT,TransientDetectorT,ReplicationSizeDetectorT,NumReplicationsDetectorT>::default_half_width = ::dcs::math::constants::infinity<typename StatisticT::value_type>::value;
 
 }}} // Namespace dcs::des::replications
 

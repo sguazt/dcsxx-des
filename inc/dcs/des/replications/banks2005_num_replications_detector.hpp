@@ -2,7 +2,7 @@
  * \file dcs/des/replications/banks2005_num_replications_detector.hpp
  *
  * \brief Number of replications detector based on the confidence interval
- *  method proposed by (Banks, 2005).
+ *  method proposed by (Banks, 2005) in Chaper 11.
  *
  * References:
  * - J. Banks, J.S. Carson II, B.L. Nelson, and D.M. Nicol.
@@ -36,24 +36,23 @@
 #define DCS_DES_REPLICATIONS_BANKS2005_NUM_REPLICATIONS_DETECTOR_HPP
 
 
+#include <boost/math/distributions/normal.hpp>
+#include <boost/math/distributions/students_t.hpp>
 #include <cmath>
+#include <cstddef>
+#include <dcs/assert.hpp>
+#include <dcs/exception.hpp>
+#include <dcs/logging.hpp>
 #include <dcs/macro.hpp>
 #include <dcs/math/constants.hpp>
-#include <dcs/math/stats/distribution/normal.hpp>
-#include <dcs/math/stats/distribution/students_t.hpp>
-#include <dcs/math/stats/function/quantile.hpp>
 #include <dcs/math/function/sqr.hpp>
-#include <iostream>
 //#include <vector>
 #include <stdexcept>
 
 
 namespace dcs { namespace des { namespace replications {
 
-template <
-	typename RealT,
-	typename UIntT
->
+template <typename RealT, typename UIntT = std::size_t>
 class banks2005_num_replications_detector
 {
 	public: typedef RealT real_type;
@@ -67,26 +66,27 @@ class banks2005_num_replications_detector
 	public: static const uint_type default_max_num_replications; // = ::dcs::math::constants::infinity<uint_type>::value;
 
 
-	public: explicit banks2005_num_replications_detector(real_type ci_level=default_ci_level, real_type rel_prec=default_relative_precision, uint_type min_num_repl=default_min_num_replications, uint_type max_num_repl=default_max_num_replications)
-		: ci_level_(ci_level),
-		  rel_prec_(rel_prec),
-		  r_min_(min_num_repl),
-		  r_max_(max_num_repl),
-		  r_(0),
-		  detected_(false),
-		  aborted_(false),
-		  first_call_(true)
+	public: explicit banks2005_num_replications_detector(real_type ci_level = default_ci_level,
+														 real_type rel_prec = default_relative_precision,
+														 uint_type min_num_repl = default_min_num_replications,
+														 uint_type max_num_repl = default_max_num_replications)
+	: ci_level_(ci_level),
+	  rel_prec_(rel_prec),
+	  r_min_(min_num_repl),
+	  r_max_(max_num_repl),
+	  r_(0),
+	  detected_(false),
+	  aborted_(false),
+	  first_call_(true)
 	{
 		// pre: min # replications >= 2
-		DCS_ASSERT(
-			r_min_ >= 2,
-			throw ::std::invalid_argument("[dcs::des::replications::banks2005_num_replications_detector] Min number of replications must be >= 2.")
-		);
+		DCS_ASSERT(r_min_ >= 2,
+				   DCS_EXCEPTION_THROW(::std::invalid_argument,
+									   "[dcs::des::replications::banks2005_num_replications_detector] Min number of replications must be >= 2."));
 		// pre: min # replications <= max # replications
-		DCS_ASSERT(
-			r_min_ <= r_max_,
-			throw ::std::invalid_argument("[dcs::des::replications::banks2005_num_replications_detector] Min number of replications must be <=  max number of replications.")
-		);
+		DCS_ASSERT(r_min_ <= r_max_,
+				   DCS_EXCEPTION_THROW(::std::invalid_argument,
+									   "[dcs::des::replications::banks2005_num_replications_detector] Min number of replications must be <=  max number of replications."));
 	}
 
 
@@ -103,14 +103,21 @@ class banks2005_num_replications_detector
 			return false;
 		}
 
+		if (::std::isinf(rel_prec_))
+		{
+			r_ = r_cur;
+			detected_ = true;
+			return true;
+		}
+
 		if (stddev < 0 || ::std::isinf(stddev))
 		{
-			::std::clog << "[Warning] Standard deviation is negative or infinite." << ::std::endl;
+			dcs::log_warn(DCS_LOGGING_AT, "[Warning] Standard deviation is negative or infinite.");
 			detected_ = false;
 			return false;
 		}
 
-		real_type half_alpha((1-ci_level_)/real_type(2));
+		const real_type half_alpha = (1-ci_level_)/2.0;
 
 		//real_type c = rel_prec_/(1+rel_prec_);
 
@@ -119,10 +126,9 @@ class banks2005_num_replications_detector
 		{
 			first_call_ = false;
 
-			::dcs::math::stats::normal_distribution<real_type> norm;
-			real_type z = ::dcs::math::stats::quantile(norm, half_alpha);
+			::boost::math::normal_distribution<real_type> norm;
+			const real_type z = ::boost::math::quantile(norm, half_alpha);
 			r_ =  static_cast<uint_type>(::dcs::math::sqr(z*stddev/(rel_prec_*estimate)));
-			//r_ =  static_cast<uint_type>(::dcs::math::sqr(z*stddev/(c*estimate)));
 
 			if (r_ < r_min_)
 			{
@@ -130,15 +136,14 @@ class banks2005_num_replications_detector
 			}
 		}
 
-		real_type r_want(0);
+		real_type r_want = 0;
 
 		// Compute the real estimate of R
 		do
 		{
-			::dcs::math::stats::students_t_distribution<real_type> student_t(r_-1);
-			real_type t = ::dcs::math::stats::quantile(student_t, half_alpha);
+			::boost::math::students_t_distribution<real_type> student_t(r_-1);
+			const real_type t = ::boost::math::quantile(student_t, half_alpha);
 			r_want = ::dcs::math::sqr(t*stddev/(rel_prec_*estimate));
-			//r_want = ::dcs::math::sqr(t*stddev/(c*estimate));
 
 			if (r_ < r_want)
 			{
@@ -147,11 +152,18 @@ class banks2005_num_replications_detector
 		}
 		while (r_ < r_want && r_ < r_max_);
 
-		detected_ = (r_ < r_max_);
-//		aborted_ = (r_ >= r_max_);
+		if (r_ <= r_max_)
+		{
+			detected_ = true;
+		}
+		else
+		{
+			r_ = r_max_;
+			detected_ = false;
+			aborted_ = true;
+		}
 
-//		means_.push_back(estimator);
-::std::cerr << "(" << this << ") Detecting # Replications --> " << ::std::boolalpha << detected_ << " (r_: " << r_ << " - r_want: " << r_want << " - r_max_: " << r_max_ << ")" << ::std::endl;//XXX
+DCS_DEBUG_TRACE("(" << this << ") Detecting Sample Size --> " << ::std::boolalpha << detected_ << " (r_: " << r_ << " - r_want: " << r_want << " - r_max_: " << r_max_ << " - aborted_: " << aborted_ << ")");//XXX
 
 		return detected_;
 	}
@@ -191,16 +203,11 @@ class banks2005_num_replications_detector
 	}
 
 
-	/// The confidence level
-	private: real_type ci_level_;
-	/// The target relative precision.
-	private: real_type rel_prec_;
-	/// The minimum number of replications
-	private: uint_type r_min_;
-	/// The maximum number of replications
-	private: uint_type r_max_;
-	/// The actual number of replications
-	private: uint_type r_;
+	private: real_type ci_level_; ///< The confidence level
+	private: real_type rel_prec_; ///< The target relative precision to reach.
+	private: uint_type r_min_; ///< The minimum number of replications to perform
+	private: uint_type r_max_; ///< The maximum number of replications to perform
+	private: uint_type r_; ///< The actual detected number of replications to perform
 	private: bool detected_;
 	private: bool aborted_;
 	private: bool first_call_;

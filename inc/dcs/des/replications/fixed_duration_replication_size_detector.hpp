@@ -61,13 +61,12 @@ class fixed_duration_replication_size_detector
 	/**
 	 * \brief A constructor.
 	 *
-	 * \param n_obs The number of observations to collect.
+	 * \param time The time at which the detection must stop
+	 * \param ptr_engine A pointer to the simulator engine
 	 */
 	public: fixed_duration_replication_size_detector(real_type time, des_engine_pointer const& ptr_engine)
-		: max_duration_(time),
-		  ptr_eng_(ptr_engine)//,
-//		  detect_aborted_(false),
-//		  detected_(false)
+	: max_duration_(time),
+	  ptr_eng_(ptr_engine)
 	{
 		// empty
 	}

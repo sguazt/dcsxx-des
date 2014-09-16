@@ -29,10 +29,16 @@
 #define DCS_DES_BASE_STATISTIC_HPP
 
 
+#include <boost/math/distributions/students_t.hpp>
 #include <cmath>
+#include <cstddef>
+#include <dcs/assert.hpp>
 #include <dcs/des/statistic_categories.hpp>
+#include <dcs/exception.hpp>
 #include <dcs/macro.hpp>
 #include <iosfwd>
+#include <limits>
+#include <stdexcept>
 #include <string>
 
 
@@ -43,7 +49,7 @@ namespace dcs { namespace des {
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename ValueT, typename UIntT>
+template <typename ValueT, typename UIntT = std::size_t>
 class base_statistic
 {
 	public: typedef ValueT value_type;
@@ -54,84 +60,73 @@ class base_statistic
 
 
 	/// Default constructor
-	public: base_statistic()
-	: enabled_(true)
+	protected: explicit base_statistic(value_type ci_level = default_confidence_level)
+	: ci_level_(ci_level),
+	  enabled_(true)
 	{
+		DCS_ASSERT(ci_level_ > 0,
+				   DCS_EXCEPTION_THROW(std::invalid_argument, "Confidence interval level must be a positive number"));
 	}
-
 
 	// Compiler-generated copy-constructor/assignment are fine.
 
-
 	/// Destructor
 	public: virtual ~base_statistic() { }
-
 
 	public: void operator()(value_type obs, value_type weight = value_type(1))
 	{
 		do_collect(obs, weight);
 	}
 
-
 	public: statistic_category category() const
 	{
 		return do_category();
 	}
-
 
 	public: void reset()
 	{
 		do_reset();
 	}
 
-
 	public: uint_type num_observations() const
 	{
 		return do_num_observations();
 	}
-
 
 	public: value_type estimate() const
 	{
 		return do_estimate();
 	}
 
-
 	public: value_type variance() const
 	{
 		return do_variance();
 	}
 
-
 	public: value_type standard_deviation() const
 	{
-		return do_standard_deviation();
+		return std::sqrt(this->variance());
 	}
-
 
 	public: value_type half_width() const
 	{
 		return do_half_width();
 	}
 
-
 	public: value_type relative_precision() const
 	{
 		return do_relative_precision();
 	}
 
-
 	public: value_type confidence_level() const
 	{
-		return do_confidence_level();
+		return ci_level_;
 	}
-
 
 	public: ::std::string name() const
 	{
 		return do_name();
 	}
-
 
 	public: void enable(bool value)
 	{
@@ -155,6 +150,16 @@ class base_statistic
 		return enabled_;
 	}
 
+	public: value_type lower() const
+	{
+		return this->estimate() - this->half_width();
+	}
+
+	public: value_type upper() const
+	{
+		return this->estimate() + this->half_width();
+	}
+
 
 	///@{ Interface methods
 
@@ -176,19 +181,10 @@ class base_statistic
 	private: virtual value_type do_variance() const = 0;
 
 
-	private: virtual value_type do_standard_deviation() const
-	{
-		return ::std::sqrt(variance());
-	}
-
-
 	private: virtual value_type do_half_width() const = 0;
 
 
 	private: virtual value_type do_relative_precision() const = 0;
-
-
-	private: virtual value_type do_confidence_level() const = 0;
 
 
 	private: virtual ::std::string do_name() const = 0;
@@ -218,8 +214,8 @@ class base_statistic
 				  << " -- C.I. ("
 				  << (estimate()-half_width())
 				  << ", " << (estimate()+half_width())
-				  << ") at " << (confidence_level()*100) << "%"
-				  << " (r.e. " << (relative_precision()*100) << "% - sample size: " << this->num_observations() << ")";
+				  << ") at " << (this->confidence_level()*100) << "%"
+				  << " (r.e. " << (this->relative_precision()*100) << "% - sample size: " << this->num_observations() << ")";
 	}
 
 	///@} Interface methods
@@ -237,12 +233,13 @@ class base_statistic
 	}
 
 
+	private: value_type ci_level_;
 	private: bool enabled_;
 }; // base_statistic
 
 
 template <typename ValueT, typename UIntT>
-const ValueT base_statistic<ValueT,UIntT>::default_confidence_level = ValueT(0.95);
+const ValueT base_statistic<ValueT,UIntT>::default_confidence_level = static_cast<ValueT>(0.95);
 
 
 }} // Namespace dcs::des
