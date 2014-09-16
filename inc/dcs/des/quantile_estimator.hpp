@@ -43,6 +43,18 @@
 
 namespace dcs { namespace des {
 
+namespace quantest_detail {
+
+template <typename RealT>
+std::string make_name(RealT p)
+{
+	::std::ostringstream oss;
+	oss << p << "th Quantile";
+	return oss.str();
+}
+
+} // Namespace quantest_detail
+
 /**
  * \brief Quantile estimator for independent and identically distributed
  *  samples.
@@ -70,9 +82,9 @@ class quantile_estimator: public base_statistic<ValueT,UIntT>
 			> accumulator_type;
 
 
-	public: explicit quantile_estimator(value_type p=0.5, value_type ci_level=base_type::default_confidence_level)
-	: acc_(::boost::accumulators::quantile_probability = p),
-	  ci_level_(ci_level),
+	public: explicit quantile_estimator(value_type p=0.5, value_type ci_level = base_type::default_confidence_level)
+	: base_type(ci_level, quantest_detail::make_name(p)),
+	  acc_(::boost::accumulators::quantile_probability = p),
 	  p_(p)
 	{
 		// Empty
@@ -128,7 +140,7 @@ class quantile_estimator: public base_statistic<ValueT,UIntT>
 		{
 			uint_type n(this->num_observations());
 			::dcs::math::stats::students_t_distribution<value_type> t_dist(n-1);
-			value_type t(::dcs::math::stats::quantile(t_dist, (1+ci_level_)/value_type(2)));
+			value_type t(::dcs::math::stats::quantile(t_dist, (1+this->confidence_interval())/value_type(2)));
 			value_type q(this->estimate());
 
 			return t*::std::sqrt(q*(1-q)/(this->num_observations()-1));
@@ -143,22 +155,8 @@ class quantile_estimator: public base_statistic<ValueT,UIntT>
 	}
 
 
-	private: value_type do_confidence_level() const
-	{
-		return ci_level_;
-	}
-
-
-	private: ::std::string do_name() const
-	{
-		::std::ostringstream oss;
-		oss << p_ << "th Quantile";
-		return oss.str();
-	}
-
 
 	private: accumulator_type acc_;
-	private: value_type ci_level_;
 	private: value_type p_;
 };
 

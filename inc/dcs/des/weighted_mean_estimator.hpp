@@ -77,12 +77,12 @@ class weighted_mean_estimator: public base_statistic<ValueT,UIntT>
 	public: typedef mean_statistic_category category_type;
 
 
-	public: explicit weighted_mean_estimator(value_type ci_level=base_type::default_confidence_level)
-	: count_(0),
+	public: explicit weighted_mean_estimator(value_type ci_level = base_type::default_confidence_level)
+	: base_type(ci_level, "Weighted Mean"),
+	  count_(0),
 	  m_(0),
 	  s2_(0),
-	  sumw_(0),
-	  ci_level_(ci_level)
+	  sumw_(0)
 	{
 		// Empty
 	}
@@ -117,12 +117,6 @@ class weighted_mean_estimator: public base_statistic<ValueT,UIntT>
 	}
 
 
-	private: value_type do_confidence_level() const
-	{
-		return ci_level_;
-	}
-
-
 	private: value_type do_estimate() const
 	{
 		return m_;
@@ -134,7 +128,7 @@ class weighted_mean_estimator: public base_statistic<ValueT,UIntT>
 		if (count_ > 1)
 		{
 			::dcs::math::stats::students_t_distribution<value_type> t_dist(count_-1);
-			value_type t = ::dcs::math::stats::quantile(t_dist, (value_type(1)+ci_level_)/value_type(2));
+			value_type t = ::dcs::math::stats::quantile(t_dist, (value_type(1)+this->confidence_level())/value_type(2));
 
 			//return ::std::sqrt(this->variance()/count_)*t;
 			return t*(this->standard_deviation()/::std::sqrt(count_));
@@ -185,22 +179,10 @@ class weighted_mean_estimator: public base_statistic<ValueT,UIntT>
 	}
 
 
-	private: ::std::string do_name() const
-	{
-		return "Weighted Mean";
-	}
-
-
-	/// Number of observations seen to date.
-	private: uint_type count_;
-	/// Accumulator for the weighted mean.
-	private: value_type m_;
-	/// Accumulator for the weighted variance.
-	private: value_type s2_;
-	/// Accumulator for the sum of weights
-	private: value_type sumw_;
-	/// Confidence level for interval estimation.
-	private: value_type ci_level_;
+	private: uint_type count_; ///< Number of observations seen to date.
+	private: value_type m_; ///< Accumulator for the weighted mean.
+	private: value_type s2_; ///< Accumulator for the weighted variance.
+	private: value_type sumw_; ///< Accumulator for the sum of weights
 }; // weighted_mean_estimator
 
 

@@ -59,7 +59,7 @@ class mean_estimator: public base_statistic<ValueT,UIntT>
 
 
 	public: explicit mean_estimator(value_type ci_level = base_type::default_confidence_level)
-	: base_type(ci_level),
+	: base_type(ci_level, "Mean"),
 	  count_(0),
 	  m1_(0),
 	  m2_(0)
@@ -144,11 +144,6 @@ class mean_estimator: public base_statistic<ValueT,UIntT>
 				: ::dcs::math::constants::infinity<value_type>::value;
 	}
 
-
-	private: ::std::string do_name() const
-	{
-		return "Mean";
-	}
 
 
 	/// Number of observations seen to date.

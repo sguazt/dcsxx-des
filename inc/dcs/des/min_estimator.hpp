@@ -56,10 +56,10 @@ class min_estimator: public base_statistic<ValueT,UIntT>
 	public: typedef min_statistic_category category_type;
 
 
-	public: explicit min_estimator(value_type ci_level=base_type::default_confidence_level)
-	: count_(0),
-	  m_(::dcs::math::constants::infinity<value_type>::value),
-	  ci_level_(ci_level)
+	public: explicit min_estimator(value_type ci_level = base_type::default_confidence_level)
+	: base_type(ci_level, "Min"),
+	  count_(0),
+	  m_(::dcs::math::constants::infinity<value_type>::value)
 	{
 		// Empty
 	}
@@ -79,12 +79,6 @@ class min_estimator: public base_statistic<ValueT,UIntT>
 		{
 			m_ = obs;
 		}
-	}
-
-
-	private: value_type do_confidence_level() const
-	{
-		return ci_level_;
 	}
 
 
@@ -131,12 +125,8 @@ class min_estimator: public base_statistic<ValueT,UIntT>
 	}
 
 
-	/// Number of observations seen to date.
-	private: uint_type count_;
-	/// Accumulator for the minimum value.
-	private: value_type m_;
-	/// Confidence level for interval estimation.
-	private: value_type ci_level_;
+	private: uint_type count_; ///< Number of observations seen to date.
+	private: value_type m_; ///< Accumulator for the minimum value.
 };
 
 

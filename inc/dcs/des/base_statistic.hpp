@@ -56,12 +56,15 @@ class base_statistic
 	public: typedef UIntT uint_type;
 
 
-	public: static const value_type default_confidence_level; //= 0.95;
+	public: static const value_type default_confidence_level;
+	public: static const std::string default_name;
 
 
 	/// Default constructor
-	protected: explicit base_statistic(value_type ci_level = default_confidence_level)
+	protected: explicit base_statistic(value_type ci_level = default_confidence_level,
+									   std::string const& name = default_name)
 	: ci_level_(ci_level),
+	  name_(name),
 	  enabled_(true)
 	{
 		DCS_ASSERT(ci_level_ > 0,
@@ -123,9 +126,14 @@ class base_statistic
 		return ci_level_;
 	}
 
+	public: void name(std::string const& s)
+	{
+		name_ = s;
+	}
+
 	public: ::std::string name() const
 	{
-		return do_name();
+		return name_;
 	}
 
 	public: void enable(bool value)
@@ -134,7 +142,6 @@ class base_statistic
 
 		enabled_ = value;
 	}
-
 
 	/**
 	 * \brief Tells if output analysis on this statistic has been enaabled.
@@ -160,35 +167,23 @@ class base_statistic
 		return this->estimate() + this->half_width();
 	}
 
-
 	///@{ Interface methods
 
 	private: virtual statistic_category do_category() const = 0;
 
-
 	private: virtual void do_collect(value_type obs, value_type weight) = 0;
-
 
 	private: virtual void do_reset() = 0;
 
-
 	private: virtual uint_type do_num_observations() const = 0;
-
 
 	private: virtual value_type do_estimate() const = 0;
 
-
 	private: virtual value_type do_variance() const = 0;
-
 
 	private: virtual value_type do_half_width() const = 0;
 
-
 	private: virtual value_type do_relative_precision() const = 0;
-
-
-	private: virtual ::std::string do_name() const = 0;
-
 
 	/**
 	 * \brief Tells if output analysis on this statistic has been enabled.
@@ -206,7 +201,6 @@ class base_statistic
 		// empty
 	}
 
-
 	protected: virtual ::std::ostream& do_print(::std::ostream& os) const
 	{
 		return os << estimate()
@@ -219,7 +213,6 @@ class base_statistic
 	}
 
 	///@} Interface methods
-
 
 	public: template <
 				typename CharT,
@@ -234,12 +227,16 @@ class base_statistic
 
 
 	private: value_type ci_level_;
+	private: std::string name_;
 	private: bool enabled_;
 }; // base_statistic
 
 
 template <typename ValueT, typename UIntT>
 const ValueT base_statistic<ValueT,UIntT>::default_confidence_level = static_cast<ValueT>(0.95);
+
+template <typename ValueT, typename UIntT>
+const std::string base_statistic<ValueT,UIntT>::default_name = "Unnamed";
 
 
 }} // Namespace dcs::des

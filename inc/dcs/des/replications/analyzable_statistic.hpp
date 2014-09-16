@@ -672,12 +672,6 @@ class analyzable_statistic: public base_analyzable_statistic<
 	}
 
 
-	private: ::std::string do_name() const
-	{
-		return stat_.name();
-	}
-
-
 	private: void do_refresh()
 	{
 //::std::cerr << "[replications::analyzable_statistic] (" << this << ") BEGIN REFRESH - repl-size-detector: <" << repl_size_detector_.print() << "> - repl_size_detected_: " << repl_size_detected_ << " - repl_size_: " << repl_size_ << ::std::endl;///XXX
