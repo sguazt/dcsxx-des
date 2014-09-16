@@ -168,31 +168,32 @@ class analyzable_statistic: public base_analyzable_statistic<
 		);
 	}
 
+	/// Returns the current number of performed replications
 	public: uint_type actual_num_replications() const
 	{
 		return repl_mean_stat_.num_observations();
 	}
 
+	/// Returns the size of current replication
 	public: uint_type actual_replication_size() const
 	{
 		return stat_.num_observations();
 	}
 
-//	public: bool num_replications_detected() const
-//	{
-//		return num_repl_detected_;
-//	}
-
+	/// Returns the target number of replications to perform
 	public: uint_type num_replications() const
 	{
 		return num_repl_;
 	}
 
+	/// Tells if the independent replications method is done
 	public: bool replication_done() const
 	{
-		return repl_size_detected_ && actual_replication_size() >= replication_size();
+		return  repl_size_detected_
+				&& this->actual_replication_size() >= this->replication_size();
 	}
 
+	/// Returns the target size of each replication
 	public: uint_type replication_size() const
 	{
 		return repl_size_;
@@ -506,13 +507,13 @@ class analyzable_statistic: public base_analyzable_statistic<
 		bool prec_reached = false;
 
 		if (num_repl_detected_
-			&& actual_num_replications() >= num_repl_)
+			&& this->actual_num_replications() >= num_repl_)
 		{
 			prec_reached = this->target_precision_reached();
 		}
 
 		if (!num_repl_detected_
-			|| (actual_num_replications() >= num_repl_ && !prec_reached))
+			|| (this->actual_num_replications() >= num_repl_ && !prec_reached))
 		{
 			// Number of replications is still to be detected...
 			// ... Or need to redetect since, after having performed the
@@ -599,7 +600,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 
 	private: bool do_observation_complete() const
 	{
-		return replication_done();
+		return this->replication_done();
 	}
 
 
