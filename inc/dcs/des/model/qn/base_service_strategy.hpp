@@ -64,6 +64,7 @@ class base_service_strategy
 
 	public: base_service_strategy()
 	: multiplier_(1),
+	  share_(1),
 	  rt_infos_(),
 	  ptr_node_(0),
 	  busy_time_(0),
@@ -101,6 +102,22 @@ class base_service_strategy
 	public: service_node_type const& node() const
 	{
 		return *ptr_node_;
+	}
+
+
+	public: void share(real_type val)
+	{
+		update_state();
+
+		share_ = val;
+
+		do_update_service();
+	}
+
+
+	public: real_type share() const
+	{
+		return share_;
 	}
 
 
@@ -418,6 +435,7 @@ class base_service_strategy
 	/// Resource capacity multiplier: the real resource capacity will be the
 	/// result of product between this quantity and the service time (>= 0).
 	private: real_type multiplier_;
+	private: real_type share_; ///< The fraction of resource.
 	/// Maintain information about running times.
 	private: runtime_info_map rt_infos_;
 	/// Pointer the node using this service strategy.
