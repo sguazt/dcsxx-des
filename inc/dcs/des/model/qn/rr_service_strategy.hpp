@@ -107,11 +107,11 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 	  num_busy_(0),
 	  next_srv_(0),
 	  ptr_quantum_expiry_evt_src_(new event_source_type("RR Quantum Exceeded")),
-	  old_share_(0)
+	  old_share_(0),
+	  old_multiplier_(0)
 	{
 		init();
 	}
-
 
 	public: template <typename ForwardIterT>
 		rr_service_strategy(real_type quantum, ForwardIterT first_distr, ForwardIterT last_distr)
@@ -123,11 +123,11 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 	  num_busy_(0),
 	  next_srv_(0),
 	  ptr_quantum_expiry_evt_src_(new event_source_type("RR Quantum Exceeded")),
-	  old_share_(0)
+	  old_share_(0),
+	  old_multiplier_(0)
 	{
 		init();
 	}
-
 
 	public: template <typename ClassForwardIterT, typename DistrForwardIterT>
 		rr_service_strategy(real_type quantum, ClassForwardIterT first_class_id, ClassForwardIterT last_class_id, DistrForwardIterT first_distr)
@@ -138,7 +138,8 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 	  num_busy_(0),
 	  next_srv_(0),
 	  ptr_quantum_expiry_evt_src_(new event_source_type("RR Quantum Exceeded")),
-	  old_share_(0)
+	  old_share_(0),
+	  old_multiplier_(0)
 	{
 		while (first_class_id != last_class_id)
 		{
@@ -157,7 +158,6 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		init();
 	}
 
-
 	public: template <typename ForwardIterT>
 		rr_service_strategy(real_type quantum, ::std::size_t num_servers, ForwardIterT first_distr, ForwardIterT last_distr)
 	: base_type(),
@@ -167,7 +167,8 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 	  num_busy_(0),
 	  next_srv_(0),
 	  ptr_quantum_expiry_evt_src_(new event_source_type("RR Quantum Exceeded")),
-	  old_share_(0)
+	  old_share_(0),
+	  old_multiplier_(0)
 	{
 		while (first_distr != last_distr)
 		{
@@ -178,7 +179,6 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		init();
 	}
 
-
 	public: template <typename ClassForwardIterT, typename DistrForwardIterT>
 		rr_service_strategy(real_type quantum, ::std::size_t num_servers, ClassForwardIterT first_class_id, ClassForwardIterT last_class_id, DistrForwardIterT first_distr)
 	: base_type(),
@@ -188,7 +188,8 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 	  num_busy_(0),
 	  next_srv_(0),
 	  ptr_quantum_expiry_evt_src_(new event_source_type("RR Quantum Exceeded")),
-	  old_share_(0)
+	  old_share_(0),
+	  old_multiplier_(0)
 	{
 		while (first_class_id != last_class_id)
 		{
@@ -205,22 +206,10 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		init();
 	}
 
-
-	// Compiler-generated copy-constructor, copy-assignment, and destructor
-	// are fine.
-
-
 	public: real_type quantum() const
 	{
 		return q_;
 	}
-
-
-//	public: real_type scaled_quantum() const
-//	{
-//		// The higher is the power of the server, the lower should be the quantum
-//		return q_/this->capacity_multiplier();
-//	}
 
 
 	public: event_source_type& quantum_expiry_event_source()
@@ -228,308 +217,23 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		return *ptr_quantum_expiry_evt_src_;
 	}
 
-
 	public: event_source_type const& quantum_expiry_event_source() const
 	{
 		return *ptr_quantum_expiry_evt_src_;
 	}
 
-
-	//@{ Interface member functions
-
-//	private: bool do_can_serve(customer_pointer const& ptr_customer) const
-//	{
-//		return servers_.size() < num_busy_;
-//	}
-
-
-#if 0
-	private: void do_update_service()
-	{
-		DCS_DEBUG_TRACE_L(3, "(" << this << ") BEGIN Do-Update-Service (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
-
-//		typedef typename server_container::const_iterator server_iterator;
-//		typedef typename customer_container::const_iterator customer_iterator;
-//
-//		real_type cur_time(this->node().network().engine().simulated_time());
-//		//real_type common_share(this->capacity_multiplier()/static_cast<real_type>(ns_));
-//		real_type share(this->capacity_multiplier()/static_cast<real_type>(ns_));
-//
-//		server_iterator srv_end_it(servers_.end());
-//		for (server_iterator srv_it = servers_.begin(); srv_it != srv_end_it; ++srv_it)
-//		{
-//			customer_constainer const& customers(*srv_it);
-//
-////			uint_type nc(customers.size());
-////			real_type share(common_share/static_cast<real_type>(nc));
-//			customer_iterator cust_end_it(customers.end());
-//			for (customer_iterator cust_it = customers.begin(); cust_it != cust_end_it; ++cust_it)
-//			{
-//				runtime_info_type& rt_info(this->info(*cust_it));
-//
-//				DCS_DEBUG_TRACE_L(3, "Updating Customer: " << rt_info.get_customer() << " - Service demand: " << rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - old share: " << rt_info.share() << " - old runtime: " << rt_info.runtime() << " - old completed work: " << rt_info.completed_work() << " - old residual-work: " << rt_info.residual_work());//XXX
-//
-//				// Increment the residual runtime of this customer by a factor of nc
-//				rt_info.accumulate_work2(cur_time);
-//				rt_info.share(share);
-//				// And reschedule the end-of-service
-//				this->node().reschedule_service(rt_info.get_customer(), rt_info.residual_work()/share);
-//
-//				DCS_DEBUG_TRACE_L(3, "Updated Customer: " << rt_info.get_customer() << " - Service demand: " << rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - new share: " << rt_info.share() << " - new runtime: " << rt_info.runtime() << " - new completed work: " << rt_info.completed_work() << " - new residual-work: " << rt_info.residual_work());//XXX
-//			}
-//		}
-
-//		typedef typename server_event_map::iterator server_event_iterator;
-//
-//		engine_type& engine(this->node().network().engine());
-//		const real_type cur_time(engine.simulated_time());
-//		const real_type share(common_share());
-//
-//		server_event_iterator end_it(srv_evt_map_.end());
-//		for (server_event_iterator it = srv_evt_map_.begin(); it != end_it; ++it)
-//		{
-//			//uint_type sid(it->first);
-//			event_pointer ptr_evt(it->second);
-//
-//			// Compute the new residual amount of work that still is to be done.
-//			real_type old_residual(ptr_evt->fire_time()-cur_time);
-//			real_type new_residual(old_residual*old_share_/share);
-//
-//			// check: residual time cannot refer to the past!
-//			DCS_DEBUG_ASSERT( new_residual >= 0 );
-//
-//			// Update event state:
-//			// <new-amount-of-work> = <already-done-amount-of-work>+<new-<residual-work>
-//			//                      = (<old-amount-of-work>-<old-residual-work>)+<new-residual-work>
-//			quantum_expiry_event_state_type state = ptr_evt->template unfolded_state<quantum_expiry_event_state_type>();
-//
-//			DCS_DEBUG_TRACE_L(3, "(" << this << ") Node: " << this->node() << " -- Reschedling QUANTUM-EXPIRTY -> Old Share: " << old_share_ << " - Current Share: " << common_share() << " - old residual: " << old_residual << " - new residual: " << new_residual << " - old work: " << state.work << " - new work: " << ((state.work-old_residual)+new_residual) << " (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
-//
-////if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
-//{//XXX
-////::std::cerr << "(" << this << ") Node: " << this->node() << " -- Reschedling QUANTUM-EXPIRTY -> Current Share: " << common_share() << " - old residual: " << old_residual << " - new residual: " << new_residual << " - old work: " << state.work << " - new work: " << ((state.work-old_residual)+new_residual) << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
-////}//XXX
-//			state.work = (state.work-old_residual)+new_residual;
-//			ptr_evt->state() = state;
-//
-//			// Reschedule the QUANTUM-EXPIRY event
-//			engine.reschedule_event(ptr_evt, cur_time+new_residual);
-//		}
-
-		// For each server, check if the related QUANTUM-EXPIRY event has to be
-		// rescheduled. Possible cases:
-		// 1. The new share is greater than the previous one, and
-		// 1.1. If the firing of the next QUANTUM-EXPIRY event was premuture,
-		//      then after this update the firing will still be premature and
-		//      must be anticipated.
-		// 1.2. If the firing of the next QUANTUM-EXPIRY event wasn't premature,
-		//      check if the new share makes the residual work of the customer
-		//      (currently owning the quantum) shorter than the quantum
-		//      duration; in this case, the firing of the event must be
-		//      anticipated; otherwise all remains the same.
-		// 2. The new share is less than the previous one, and
-		// 2.1. If the firing of the next QUANTUM-EXPIRY event was premature,
-		//      check if the new share still makes the residual work of the
-		//      customer (currently owning the quatum) shorter than the quantum
-		//      duration; in this case, the firing of the event must be
-		//      rescheduled according to the new time; otherwise the firing of
-		//      the event must be rescheduled in order to last for a quantum time.
-		// 2.2. If the firing of the next QUANTUM-EXPIRY event wasn't premature,
-		//      all remans the smae.
-		// 3. The new share is equal to the previous one, then do nothing
-
-		typedef typename server_event_map::iterator server_event_iterator;
-
-		engine_type& engine(this->node().network().engine());
-		const real_type cur_time(engine.simulated_time());
-		const real_type new_share(common_share());
-
-		server_event_iterator end_it(srv_evt_map_.end());
-		for (server_event_iterator it = srv_evt_map_.begin(); it != end_it; ++it)
-		{
-			uint_type sid(it->first);
-			event_pointer ptr_evt(it->second);
-
-			// check: pointer to event must be a valid pointer
-			DCS_DEBUG_ASSERT( ptr_evt );
-
-			DCS_DEBUG_TRACE_L(3, "(" << this << ") Server ID: " << sid << " - QUANTUM-EXPIRT Event: " << *ptr_evt);
-
-			quantum_expiry_event_state_type state = ptr_evt->template unfolded_state<quantum_expiry_event_state_type>();
-			bool reschedule(false);
-			real_type new_fire_time(0);
-			real_type elapsed_time(cur_time-state.update_time);
-			real_type work_done(elapsed_time*old_share_);
-			real_type time_to_fire(ptr_evt->fire_time()-cur_time);
-
-			customer_identifier_type cid(servers_[sid].front());
-
-			DCS_DEBUG_TRACE_L(3, "(" << this << ") Server ID: " << sid << " - Customer ID: " << cid);
-
-			runtime_info_type& rt_info(this->info(cid));
-
-			DCS_DEBUG_TRACE_L(3, "Updating Customer: " << rt_info.get_customer() << " - Service demand: " << rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - Quantum: " << this->quantum() << " - State.Work: " << state.work << " - State.Uptime_Time: " << state.update_time << " - Elapsed Time: " << elapsed_time << " - Work done: " << work_done << " - old share: " << rt_info.share() << " - runtime: " << rt_info.runtime() << " - old completed work: " << rt_info.completed_work() << " - old residual-work: " << rt_info.residual_work() << " (Clock: " << engine.simulated_time() << ")");//XXX
-
-			// Accumulate the work done to date (with the old share)
-			//real_type old_residual_time(rt_info.residual_work()/old_share_);
-			//rt_info.accumulate_work2(state.work-time_to_fire*old_share_);
-			rt_info.accumulate_work_time(elapsed_time);
-			real_type new_residual_time(rt_info.residual_work()/new_share);
-			// ... And set the new share
-			rt_info.share(new_share);
-
-			// Check for QUANTUM-EXPIRY event reschedulation
-			if (new_share > old_share_)
-			{
-				// The server capacity is increased
-
-				if (state.early_expiry)
-				{
-					// Firing will still be premature (but anticipated)
-
-					state.work = rt_info.residual_work();
-					//state.early_expiry = true;
-					reschedule = true;
-					new_fire_time = cur_time+new_residual_time;
-
-					// check: make sure the fire time is really anticipated (and still premature)
-					DCS_DEBUG_ASSERT( new_fire_time <= ptr_evt->fire_time() );
-				}
-				else
-				{
-					// Check if the expiry must become premature or not
-
-					if (time_to_fire > new_residual_time)
-					{
-						// Firing will be premature
-
-						state.work = rt_info.residual_work();
-						state.early_expiry = true;
-						reschedule = true;
-						new_fire_time = cur_time+new_residual_time;
-
-						// check: make sure the fire time is really anticipated
-						DCS_DEBUG_ASSERT( new_fire_time <= ptr_evt->fire_time() );
-					}
-					else
-					{
-						// The firing remains not premature.
-						// Only change the event state
-
-						state.work = time_to_fire*new_share;
-//						state.early_expiry = false;
-//						reschedule = false;
-					}
-				}
-			}
-			else if (new_share < old_share_)
-			{
-				// The server capacity is decreased
-
-				if (state.early_expiry)
-				{
-					// Check if the expiry will still be premature or not
-
-					if (time_to_fire > new_residual_time)
-					{
-						// Firing will still be premature (but posticipated)
-
-						state.work = rt_info.residual_work();
-						//state.early_expiry = true;
-						reschedule = true;
-						new_fire_time = cur_time+new_residual_time;
-
-						// check: make sure the fire time is really posticipated
-						DCS_DEBUG_ASSERT( new_fire_time >= ptr_evt->fire_time() );
-					}
-					else
-					{
-						real_type max_residual_time(state.max_fire_time-cur_time);
-
-						if (new_residual_time < max_residual_time)
-						{
-							// Firing will still be premature (but posticipated)
-
-							state.work = new_residual_time*new_share;
-							//state.early_expiry = true;
-							reschedule = true;
-							new_fire_time = cur_time+new_residual_time;
-						}
-						else
-						{
-							// Firing will not be premature anymore
-
-							state.work = max_residual_time*new_share;
-							state.early_expiry = false;
-							reschedule = true;
-							new_fire_time = cur_time+max_residual_time;
-						}
-
-						// check: make sure the fire time is really posticipated
-						DCS_DEBUG_ASSERT( new_fire_time >= ptr_evt->fire_time() );
-					}
-				}
-				else
-				{
-					// The firing remains not premature.
-					// Only change the event state
-
-					state.work = time_to_fire*new_share;
-//					state.early_expiry = false;
-//					reschedule = false;
-				}
-			}
-
-			DCS_DEBUG_TRACE_L(3, "Updated Customer: " << rt_info.get_customer() << " - Service demand: " << rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - Quantum: " << this->quantum() << " - new share: " << rt_info.share() << " - new runtime: " << rt_info.runtime() << " - new completed work: " << rt_info.completed_work() << " - new residual-work: " << rt_info.residual_work() << " (Clock: " << engine.simulated_time() << ")");//XXX
-
-			state.update_time = cur_time;
-			ptr_evt->state() = state;
-
-			if (reschedule)
-			{
-//				if (new_fire_time < state.max_fire_time)
-//				{
-//					new_fire_time = state.max_fire_time;
-//					state.early_expiry = false;
-//				}
-//				else
-//				{
-//					state.early_expiry = true;
-//				}
-
-				DCS_DEBUG_TRACE_L(3, "(" << this << ") Node: " << this->node() << " -- Reschedling QUANTUM-EXPIRTY -> Old Share: " << old_share_ << " - Current Share: " << common_share() << " - old work: " << (ptr_evt->template unfolded_state<quantum_expiry_event_state_type>().work) << " - new work: " << state.work << " - old fire-time: " << ptr_evt->fire_time() << " - new fire-time: " << new_fire_time << " (Clock: " << engine.simulated_time() << ")");//XXX
-
-				// check: make sure the quantum does not last more than it should take
-				DCS_DEBUG_ASSERT( new_fire_time < state.max_fire_time
-								  ||
-								  ::std::abs(new_fire_time-state.max_fire_time) <= ::std::numeric_limits<real_type>::epsilon() );
-
-//if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
-//{//XXX
-//::std::cerr << "(" << this << ") Node: " << this->node() << " -- Reschedling QUANTUM-EXPIRTY -> Current Share: " << common_share() << " - old residual: " << old_residual << " - new residual: " << new_residual << " - old work: " << state.work << " - new work: " << ((state.work-old_residual)+new_residual) << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
-//}//XXX
-				// Reschedule the QUANTUM-EXPIRY event
-				engine.reschedule_event(ptr_evt, new_fire_time);
-			}
-		}
-
-		old_share_ = new_share;
-
-		DCS_DEBUG_TRACE_L(3, "(" << this << ") END Do-Update-Service (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
-	}
-#endif // 0
-
-
 	private: void do_update_service()
 	{
 		DCS_DEBUG_TRACE_L(3, "(" << this << ") BEGIN Do-Update-Service (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
 
 		typedef typename server_event_map::iterator server_event_iterator;
 
-		const real_type new_share(common_share());
+		const real_type new_share(this->share());
+		const real_type new_multiplier(this->capacity_multiplier());
 
 		// Check if we need to update currently running customers
-		if (::dcs::math::float_traits<real_type>::approximately_equal(old_share_, new_share))
+		if (::dcs::math::float_traits<real_type>::approximately_equal(old_share_, new_share)
+			&& ::dcs::math::float_traits<real_type>::approximately_equal(old_multiplier_, new_multiplier))
 		{
 			// Share is not changed
 			return;
@@ -541,7 +245,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		server_event_iterator end_it(srv_evt_map_.end());
 		for (server_event_iterator it = srv_evt_map_.begin(); it != end_it; ++it)
 		{
-			uint_type sid(it->first);
+			const uint_type sid(it->first);
 			event_pointer ptr_evt(it->second);
 
 			// check: pointer to event must be a valid pointer
@@ -555,7 +259,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 			real_type time_to_fire(ptr_evt->fire_time()-cur_time);
 			//real_type elapsed_time(cur_time-state.update_time);
 			//real_type work_done(elapsed_time*old_share_);
-			real_type work_done(state.work-time_to_fire*old_share_);
+			real_type work_done(state.work-time_to_fire*old_multiplier_);
 
 			customer_identifier_type cid(servers_[sid].front());
 
@@ -569,7 +273,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 			//real_type old_residual_time(rt_info.residual_work()/old_share_);
 			rt_info.accumulate_work2(work_done);
 			//rt_info.accumulate_work_time(elapsed_time);
-			real_type new_residual_time(rt_info.residual_work()/new_share);
+			real_type new_residual_time(rt_info.residual_work()/new_multiplier);
 
 			// Set the new share
 			rt_info.share(new_share);
@@ -602,7 +306,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 
 			if (!::dcs::math::float_traits<real_type>::approximately_equal(new_fire_time, ptr_evt->fire_time()))
 			{
-				DCS_DEBUG_TRACE_L(3, "(" << this << ") Node: " << this->node() << " -- Reschedling QUANTUM-EXPIRTY -> Old Share: " << old_share_ << " - Current Share: " << common_share() << " - old work: " << (ptr_evt->template unfolded_state<quantum_expiry_event_state_type>().work) << " - new work: " << state.work << " - old fire-time: " << ptr_evt->fire_time() << " - new fire-time: " << new_fire_time << " (Clock: " << engine.simulated_time() << ")");//XXX
+				DCS_DEBUG_TRACE_L(3, "(" << this << ") Node: " << this->node() << " -- Reschedling QUANTUM-EXPIRTY -> Old Share: " << old_share_ << " - Current Share: " << this->share() << " - old work: " << (ptr_evt->template unfolded_state<quantum_expiry_event_state_type>().work) << " - new work: " << state.work << " - old fire-time: " << ptr_evt->fire_time() << " - new fire-time: " << new_fire_time << " (Clock: " << engine.simulated_time() << ")");//XXX
 
 				// check: make sure the quantum does not last more than it should take
 				//DCS_DEBUG_ASSERT( ::dcs::math::float_traits<real_type>::definitely_greater_equal(new_fire_time, state.max_fire_time) );
@@ -610,7 +314,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 
 //if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
 //{//XXX
-//::std::cerr << "(" << this << ") Node: " << this->node() << " -- Reschedling QUANTUM-EXPIRTY -> Current Share: " << common_share() << " - old residual: " << old_residual << " - new residual: " << new_residual << " - old work: " << state.work << " - new work: " << ((state.work-old_residual)+new_residual) << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
+//::std::cerr << "(" << this << ") Node: " << this->node() << " -- Reschedling QUANTUM-EXPIRTY -> Current Share: " << this->share() << " - old residual: " << old_residual << " - new residual: " << new_residual << " - old work: " << state.work << " - new work: " << ((state.work-old_residual)+new_residual) << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
 //}//XXX
 				// Reschedule the QUANTUM-EXPIRY event
 				engine.reschedule_event(ptr_evt, new_fire_time);
@@ -622,12 +326,10 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		DCS_DEBUG_TRACE_L(3, "(" << this << ") END Do-Update-Service (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
 	}
 
-
 	private: bool do_can_serve() const
 	{
 		return true;
 	}
-
 
 	private: runtime_info_type do_serve(customer_pointer const& ptr_customer, random_generator_type& rng)
 	{
@@ -637,7 +339,8 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		DCS_DEBUG_ASSERT( ptr_customer );
 
 		const real_type cur_time(this->node().network().engine().simulated_time());
-		const real_type share(common_share());
+		const real_type share(this->share());
+		const real_type multiplier(this->capacity_multiplier());
 		real_type svc_time(0);
 
 		typename traits_type::class_identifier_type class_id = ptr_customer->current_class();
@@ -651,33 +354,11 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 
 			++num_busy_;
 		}
-//		else
-//		{
-//			// The new customer has found all servers busy and hence it has to
-//			// share a server with other (already running) customers.
-//			// We need to apply Round-Robin strategy.
-//			// However, before inserting the customer, reschedule the
-//			// end-of-service event for the already running customer on this
-//			// server.
-//
-//			typedef typename customer_container::const_iterator customer_iterator;
-//
-//			customer_iterator end_it(servers_[next_srv_].end());
-//			for (customer_iterator it = servers_[next_srv_].begin(); it != end_it; ++it)
-//			{
-//				runtime_info_type& rt_info(this->info(*it));
-//
-//				DCS_DEBUG_TRACE_L(3, "Updating Customer: " << rt_info.get_customer() << " - Service demand: " << rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - old share: " << rt_info.share() << " - old runtime: " << rt_info.runtime() << " - old completed work: " << rt_info.completed_work() << " - old residual-work: " << rt_info.residual_work());//XXX
-//
-//				this->node().reschedule_service(rt_info.get_customer(), rt_info.residual_work()/share);
-//
-//			   DCS_DEBUG_TRACE_L(3, "Updated Customer: " << rt_info.get_customer() << " - Service demand: " << rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - new share: " << rt_info.share() << " - new runtime: " << rt_info.runtime() << " - new completed work: " << rt_info.completed_work() << " - new residual-work: " << rt_info.residual_work());//XXX
-//			}
-//		}
 
 		runtime_info_type rt_info(ptr_customer, cur_time, svc_time);
 		rt_info.server_id(next_srv_);
 		rt_info.share(share);
+		rt_info.capacity_multiplier(multiplier);
 		//rt_info.temporary(true);
 
 		servers_[next_srv_].push_back(ptr_customer->id());
@@ -692,11 +373,12 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 			quantum_expiry_event_state_type state;
 			state.sid = next_srv_;
 
+			const real_type cust_quantum(quantum()*this->share());
+
 			// Check if the actual quantum should be shorter than the regular
 			// one. This happens when the runtime of the customer owing the
 			// quantum is shorted than the quantum itself.
-			//state.work = ::std::min(quantum(), rt_info.runtime());
-			if (::dcs::math::float_traits<real_type>::definitely_greater(quantum(), rt_info.runtime()))
+			if (::dcs::math::float_traits<real_type>::definitely_greater(cust_quantum, rt_info.runtime()))
 			{
 				state.work = rt_info.service_demand();
 				state.early_expiry = true;
@@ -745,7 +427,6 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		return rt_info;
 	}
 
-
 	private: void do_remove(customer_pointer const& ptr_customer)
 	{
 		DCS_DEBUG_TRACE_L(3, "(" << this << ") BEGIN Do-Remove of Customer: " << *ptr_customer << " (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
@@ -785,7 +466,6 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		DCS_DEBUG_TRACE_L(3, "(" << this << ") END Do-Remove of Customer: " << *ptr_customer << " (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
 	}
 
-
 	private: void do_remove_all()
 	{
 		servers_.clear();
@@ -795,7 +475,6 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		srv_evt_map_.clear(); //FIXME: should we really do this?
 	}
 
-
 	private: void do_reset()
 	{
 		servers_.clear();
@@ -803,23 +482,19 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		num_busy_ = next_srv_
 				  = uint_type/*zero*/();
 		srv_evt_map_.clear();
-		old_share_ = common_share();
+		old_share_ = this->share();
+		old_multiplier_ = this->capacity_multiplier();
 	}
-
 
 	private: uint_type do_num_servers() const
 	{
 		return ns_;
 	}
 
-
 	private: uint_type do_num_busy_servers() const
 	{
 		return num_busy_;
 	}
-
-	//@} Interface member functions
-
 
 	private: void init()
 	{
@@ -832,7 +507,6 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 				)
 			);
 	}
-
 
 	private: uint_type next_server(uint_type start_sid) const
 	{
@@ -855,14 +529,6 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 
 		return best_sid;
 	}
-
-
-	private: real_type common_share() const
-	{
-		//return this->capacity_multiplier()/static_cast<real_type>(ns_);
-		return this->capacity_multiplier();
-	}
-
 
 	private: void schedule_quantum_expiry(quantum_expiry_event_state_type& state, real_type delay)
 	{
@@ -892,7 +558,6 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 
 		DCS_DEBUG_TRACE_L(3, "(" << this << ") END Scheduling QUANTUM-EXPIRY for State <sid: " << state.sid << ",work: " << state.work << "> and Customer: " << servers_[state.sid].front() << " at Node: " << this->node() << " with Delay: " << delay << " (Clock: " << this->node().network().engine().simulated_time() << ")"); //XXX
 	}
-
 
 	private: void process_quantum_expiry(event_type const& evt, engine_context_type& ctx)
 	{
@@ -924,9 +589,9 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 //}//XXX
 
 //		// check: paranoid check
-//		DCS_DEBUG_ASSERT( ::std::abs(state.work-(cur_time-state.update_time)*common_share()) <= ::std::numeric_limits<real_type>::epsilon() );
+//		DCS_DEBUG_ASSERT( ::std::abs(state.work-(cur_time-state.update_time)*this->share()) <= ::std::numeric_limits<real_type>::epsilon() );
 
-		rt_info.share(common_share());
+		rt_info.share(this->share());
 		rt_info.accumulate_work2(state.work);
 		//rt_info.accumulate_work_time(cur_time-state.update_time);
 
@@ -957,8 +622,9 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 //}//XXX
 
 			runtime_info_type& next_rt_info(this->info(next_cid));
-			next_rt_info.share(common_share());
-			real_type residual_time(next_rt_info.residual_work()/common_share());
+			next_rt_info.share(this->share());
+			next_rt_info.capacity_multiplier(this->capacity_multiplier());
+			real_type residual_time(next_rt_info.residual_work()/this->capacity_multiplier());
 			real_type delay(0);
 			//state.work = ::std::min(next_rt_info.residual_work(), quantum());
 			if (::dcs::math::float_traits<real_type>::definitely_greater(quantum(), residual_time))
@@ -973,7 +639,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 			{
 				DCS_DEBUG_TRACE("Quantum (" << quantum() << ") < Real Residual Work Time (" << residual_time << ")");//XXX
 
-				state.work = quantum()*common_share();
+				state.work = quantum()*this->share();
 				state.early_expiry = false;
 				delay = quantum();
 			}
@@ -1012,8 +678,6 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 	}
 
 
-	//@{ Data members
-
 	/// The quantum
 	private: real_type q_;
 	/// The total number of servers.
@@ -1031,6 +695,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 	/// Hold <server-id,quantum-event-pointer> associations
 	private: server_event_map srv_evt_map_;
 	private: real_type old_share_;//FIXME: experimental
+	private: real_type old_multiplier_;//FIXME: experimental
 
 	//@} Data members
 };

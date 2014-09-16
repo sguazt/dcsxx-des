@@ -65,7 +65,8 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 	  ns_(1),
 	  servers_(),
 	  num_busy_(0),
-	  old_share_(0)
+	  old_share_(0),
+	  old_multiplier_(0)
 	{
 //		servers_.reserve(ns_);
 	}
@@ -78,7 +79,8 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 	  servers_(),
 	  distrs_(first_distr, last_distr),
 	  num_busy_(0),
-	  old_share_(0)
+	  old_share_(0),
+	  old_multiplier_(0)
 	{
 //		servers_.reserve(ns_);
 	}
@@ -90,7 +92,8 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 	  ns_(1),
 	  servers_(),
 	  num_busy_(0),
-	  old_share_(0)
+	  old_share_(0),
+	  old_multiplier_(0)
 	{
 //		servers_.reserve(ns_);
 
@@ -116,7 +119,8 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 	  ns_(num_servers),
 	  servers_(),
 	  num_busy_(0),
-	  old_share_(0)
+	  old_share_(0),
+	  old_multiplier_(0)
 	{
 //		servers_.reserve(ns_);
 
@@ -134,7 +138,8 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 	  ns_(num_servers),
 	  servers_(),
 	  num_busy_(0),
-	  old_share_(0)
+	  old_share_(0),
+	  old_multiplier_(0)
 	{
 //		servers_.reserve(ns_);
 
@@ -156,11 +161,11 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 	// are fine.
 
 
-	private: real_type common_share() const
-	{
-		//return this->capacity_multiplier()/static_cast<real_type>(ns_);
-		return this->capacity_multiplier();
-	}
+//	private: real_type common_share() const
+//	{
+//		//return this->capacity_multiplier()/static_cast<real_type>(ns_);
+//		return this->capacity_multiplier();
+//	}
 
 
 	//@{ Interface member functions
@@ -175,14 +180,16 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 		{
 			typedef typename server_container::const_iterator iterator;
 
-			real_type new_share(common_share());
+			real_type new_share(this->share());
+			real_type new_multiplier(this->capacity_multiplier());
 
 			// Check if we really need to update currently running customers
-			if (::dcs::math::float_traits<real_type>::approximately_equal(old_share_, new_share))
+			if (::dcs::math::float_traits<real_type>::approximately_equal(old_share_, new_share)
+				&& ::dcs::math::float_traits<real_type>::approximately_equal(old_multiplier_, new_multiplier))
 			{
 				// Share is not changed -> avoid to update customers and reschedule their end-of-service events
 
-				DCS_DEBUG_TRACE_L(3, "(" << this << ") Share not changed: " << old_share_ << " vs. " << new_share);
+				DCS_DEBUG_TRACE_L(3, "(" << this << ") Share/Multiplier not changed: " << old_share_ << " vs. " << new_share << " / " << old_multiplier_ << " vs. " << new_multiplier);
 
 				return;
 			}
@@ -208,10 +215,12 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 
 				// Increment the accumulated work done by this customer to date...
 				rt_info.accumulate_work(cur_time);
+				// ... Update the capacity multiplier,...
+				rt_info.capacity_multiplier(new_multiplier);
 				// ... Update the share,...
 				rt_info.share(new_share);
 				// ... Compute the new residual work
-				real_type new_residual_time(rt_info.residual_work()/new_share);
+				real_type new_residual_time(rt_info.residual_work()/new_multiplier);
 				// ... And reschedule the end-of-service
 				this->node().reschedule_service(*ptr_customer, new_residual_time);
 
@@ -219,6 +228,7 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 			}
 
 			old_share_ = new_share;
+			old_multiplier_ = new_multiplier;
 		}
 
 		DCS_DEBUG_TRACE_L(3, "(" << this << ") END Do-Update-Service (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
@@ -260,7 +270,8 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 
 		runtime_info_type rt_info(ptr_customer, cur_time, svc_time);
 		rt_info.server_id(num_busy_);
-		rt_info.share(common_share());
+		rt_info.share(this->share());
+		rt_info.capacity_multiplier(this->capacity_multiplier());
 
 		servers_[num_busy_] = ptr_customer;
 //		customers_servers_[ptr_customer->id()] = num_busy_;
@@ -315,7 +326,8 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 		servers_.clear();
 //		servers_.resize(ns_);
 		num_busy_ = uint_type/*zero*/();
-		old_share_ = common_share();
+		old_share_ = this->share();
+		old_multiplier_ = this->capacity_multiplier();
 //		customers_servers_.clear();
 	}
 
@@ -341,6 +353,7 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 	private: distribution_container distrs_;
 	private: uint_type num_busy_;
 	private: real_type old_share_;
+	private: real_type old_multiplier_;
 //	private: customer_server_map customers_servers_;
 
 	//@} Data members

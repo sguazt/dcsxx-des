@@ -57,6 +57,7 @@ class runtime_info
 	  wt_(0),
 	  lwut_(st_),
 	  share_(1),
+	  mult_(1),
 	  sid_(0)
 	{
 	}
@@ -68,6 +69,7 @@ class runtime_info
 	  wt_(0),
 	  lwut_(st_),
 	  share_(1),
+	  mult_(1),
 	  sid_(0)
 	{
 	}
@@ -79,6 +81,7 @@ class runtime_info
 	  wt_(0),
 	  lwut_(st_),
 	  share_(1),
+	  mult_(1),
 	  sid_(0)
 	{
 	}
@@ -100,7 +103,7 @@ class runtime_info
 
 	public: real_type runtime() const
 	{
-		return sd_/share_;
+		return sd_/mult_;
 	}
 
 
@@ -121,14 +124,10 @@ class runtime_info
 	/// Accumulate work by elapsed time from last work-update.
 	public: void accumulate_work(real_type t)
 	{
-		// NOTE: the use of epsilon() is to take care of cancellation errors due
-		//       to floating-point subtraction.
-
 		DCS_DEBUG_ASSERT( t >= 0 );
-		//DCS_DEBUG_ASSERT( wt_+(t-lwut_)*share_ <= sd_ );
-		DCS_DEBUG_ASSERT( ::dcs::math::float_traits<real_type>::definitely_less_equal(wt_+(t-lwut_)*share_, sd_) );
+		DCS_DEBUG_ASSERT( ::dcs::math::float_traits<real_type>::definitely_less_equal(wt_+(t-lwut_)/mult_, sd_) );
 
-		wt_ += (t-lwut_)*share_;
+		wt_ += (t-lwut_)/mult_;
 		lwut_ = t;
 	}
 
@@ -139,12 +138,12 @@ class runtime_info
 		// NOTE: the use of epsilon() is to take care of cancellation errors due
 		//       to floating-point subtraction.
 
-DCS_DEBUG_TRACE("(" << this << ") Accumulating work time for Customer: " << ::std::setprecision(12) << get_customer() << " -> Work Time: " << w << " - Work: " << w*share_ << " - Old Total work: " << wt_ << " - New Total work: " << (wt_+w*share_) << " - Service Demand: " << sd_ << " - Condition: " << ::std::boolalpha << (wt_+w*share_<=sd_) << " - Condition#2: " << ::std::boolalpha << ((wt_+w*share_)<=sd_) << " - Condition#3: " << ::std::boolalpha << ((wt_+w*share_)>sd_) << " - Difference: " << ((wt_+w*share_)-sd_) << " - epsilon: " << ::std::numeric_limits<real_type>::epsilon());//XXX
+DCS_DEBUG_TRACE("(" << this << ") Accumulating work time for Customer: " << ::std::setprecision(12) << get_customer() << " -> Work Time: " << w << " - Work: " << w/mult_ << " - Old Total work: " << wt_ << " - New Total work: " << (wt_+w/mult_) << " - Service Demand: " << sd_ << " - Condition: " << ::std::boolalpha << (wt_+w/mult_<=sd_) << " - Condition#2: " << ::std::boolalpha << ((wt_+w/mult_)<=sd_) << " - Condition#3: " << ::std::boolalpha << ((wt_+w/mult_)>sd_) << " - Difference: " << ((wt_+w/mult_)-sd_) << " - epsilon: " << ::std::numeric_limits<real_type>::epsilon());//XXX
 		DCS_DEBUG_ASSERT( w >= 0 );
-		//DCS_DEBUG_ASSERT( wt_+w*share_ <= sd_ );
-		DCS_DEBUG_ASSERT( ::dcs::math::float_traits<real_type>::definitely_less_equal(wt_+w*share_, sd_) );
+		//DCS_DEBUG_ASSERT( wt_+w/mult_ <= sd_ );
+		DCS_DEBUG_ASSERT( ::dcs::math::float_traits<real_type>::definitely_less_equal(wt_+w/mult_, sd_) );
 
-		wt_ += w*share_;
+		wt_ += w/mult_;
 		lwut_ = -1; // not available
 	}
 
@@ -223,6 +222,18 @@ DCS_DEBUG_TRACE("(" << this << ") Accumulating work for Customer: " << ::std::se
 	}
 
 
+	public: void capacity_multiplier(real_type val)
+	{
+		mult_ = val;
+	}
+
+
+	public: real_type capacity_multiplier() const
+	{
+		return mult_;
+	}
+
+
 	public: void utilization_profile(utilization_profile_type const& profile)
 	{
 //		return u_prof_;
@@ -249,6 +260,8 @@ DCS_DEBUG_TRACE("(" << this << ") Accumulating work for Customer: " << ::std::se
 	private: real_type lwut_;
 	/// The current resource share.
 	private: real_type share_;
+	/// The current resource capacity multiplier.
+	private: real_type mult_;
 	/// The current server ID.
 	private: uint_type sid_;
 //	private: utilization_profile_type u_prof_;
