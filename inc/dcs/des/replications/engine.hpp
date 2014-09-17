@@ -219,7 +219,7 @@ class engine: public ::dcs::des::engine<RealT>
 
 	protected: void monitor_statistics_in_replication()
 	{
-		typedef typename std::map<base_analyzable_statistic<real_type>*,bool>::const_iterator stat_iterator;
+		typedef typename std::map<boost::shared_ptr< base_analyzable_statistic<real_type> >,bool>::const_iterator stat_iterator;
 
 		DCS_DEBUG_TRACE_L(1, "(" << this << ") BEGIN Monitoring statistics in replication."); //XXX
 
@@ -514,7 +514,7 @@ class engine: public ::dcs::des::engine<RealT>
 		{
 			// Initialize statistics for the new experiment
 
-			typedef typename std::map<base_analyzable_statistic<real_type>*,bool>::iterator stat_iterator;
+			typedef typename std::map<boost::shared_ptr< base_analyzable_statistic<real_type> >,bool>::iterator stat_iterator;
 
 			const stat_iterator end_it = this->monitored_statistics().end();
 			for (
@@ -564,7 +564,7 @@ class engine: public ::dcs::des::engine<RealT>
 		{
 			// Finalize statistics for the current experiment
 
-			typedef typename std::map<base_analyzable_statistic<real_type>*,bool>::const_iterator stat_iterator;
+			typedef typename std::map<boost::shared_ptr< base_analyzable_statistic<real_type> >,bool>::const_iterator stat_iterator;
 
 			const stat_iterator end_it = this->monitored_statistics().end();
 			for (

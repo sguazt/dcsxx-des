@@ -446,7 +446,7 @@ class engine
 	public: void analyze_statistic(boost::shared_ptr< base_analyzable_statistic<RealT> > const& ptr_stat)
 	{
 		//mon_stats_.push_back(ptr_stat);
-		mon_stats_[ptr_stat.get()] = ptr_stat->steady_state_entered();
+		mon_stats_[ptr_stat] = ptr_stat->steady_state_entered();
 
 		if (!end_of_sim_)
 		{
@@ -475,7 +475,7 @@ class engine
 				DCS_EXCEPTION_THROW( ::std::invalid_argument, "Statistic not analyzed." )
 			);
 
-		mon_stats_.erase(ptr_stat.get());
+		mon_stats_.erase(ptr_stat);
 	}
 
 
@@ -884,7 +884,7 @@ class engine
 			return;
 		}
 
-		typedef typename std::map<base_analyzable_statistic<RealT>*,bool>::iterator analyzable_statistic_iterator;
+		typedef typename std::map< boost::shared_ptr< base_analyzable_statistic<RealT> >,bool>::iterator analyzable_statistic_iterator;
 
 		const analyzable_statistic_iterator end_it = mon_stats_.end();
 		for (analyzable_statistic_iterator it = mon_stats_.begin();
@@ -916,7 +916,7 @@ class engine
 			return;
 		}
 
-		typedef typename std::map<base_analyzable_statistic<RealT>*,bool>::iterator analyzable_statistic_iterator;
+		typedef typename std::map< boost::shared_ptr<base_analyzable_statistic<RealT> >,bool>::iterator analyzable_statistic_iterator;
 
 		const analyzable_statistic_iterator end_it = mon_stats_.end();
 		bool prec_reached = true;
@@ -953,13 +953,13 @@ class engine
 	}
 
 
-	protected: std::map<base_analyzable_statistic<RealT>*,bool>& monitored_statistics()
+	protected: std::map< boost::shared_ptr< base_analyzable_statistic<RealT> >,bool>& monitored_statistics()
 	{
 		return mon_stats_;
 	}
 
 
-	protected: std::map<base_analyzable_statistic<RealT>*,bool> const& monitored_statistics() const
+	protected: std::map< boost::shared_ptr< base_analyzable_statistic<RealT> >,bool> const& monitored_statistics() const
 	{
 		return mon_stats_;
 	}
@@ -1038,7 +1038,7 @@ class engine
 	private: bool end_of_sim_; ///< Tell if simulation is done.
 	private: std::size_t num_events_; ///< The total number of events (including the ones scheduled by the engine itself).
 	private: std::size_t num_usr_events_; ///< The total number of events (including the ones scheduled by the engine itself).
-	private: std::map<base_analyzable_statistic<RealT>*,bool> mon_stats_;
+	private: std::map< boost::shared_ptr< base_analyzable_statistic<RealT> >,bool> mon_stats_;
 	//private: boost::shared_ptr< base_analyzable_statistic<RealT> > ptr_mon_stat_;
 
 	//@} Member variables
