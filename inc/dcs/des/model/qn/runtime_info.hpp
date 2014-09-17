@@ -44,7 +44,6 @@ class runtime_info
 {
 	public: typedef TraitsT traits_type;
 	public: typedef typename traits_type::real_type real_type;
-	public: typedef typename traits_type::uint_type uint_type;
 	public: typedef server_utilization_profile<real_type> utilization_profile_type;
 	public: typedef customer<traits_type> customer_type;
 	public: typedef ::boost::shared_ptr<customer_type> customer_pointer;
@@ -186,13 +185,13 @@ DCS_DEBUG_TRACE("(" << this << ") Accumulating work for Customer: " << ::std::se
 	}
 
 
-	public: void server_id(uint_type id)
+	public: void server_id(std::size_t id)
 	{
 		sid_ = id;
 	}
 
 
-	public: uint_type server_id() const
+	public: std::size_t server_id() const
 	{
 		return sid_;
 	}
@@ -263,7 +262,7 @@ DCS_DEBUG_TRACE("(" << this << ") Accumulating work for Customer: " << ::std::se
 	/// The current resource capacity multiplier.
 	private: real_type mult_;
 	/// The current server ID.
-	private: uint_type sid_;
+	private: std::size_t sid_;
 //	private: utilization_profile_type u_prof_;
 };
 

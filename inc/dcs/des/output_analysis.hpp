@@ -30,6 +30,7 @@
 
 
 #include <boost/smart_ptr.hpp>
+#include <cstddef>
 
 
 namespace dcs { namespace des {
@@ -61,8 +62,8 @@ template <
 		StatisticT,
 		OutputAnalyzerT
 	>::type
-//> make_analyzable_statistic(StatisticT const& stat, DesEngineT const& des_engine, typename StatisticT::value_type relative_precision, typename StatisticT::value_type confidence_level, typename StatisticT::uint_type max_obs);
-> make_analyzable_statistic(StatisticT const& stat, DesEngineT const& des_engine, OutputAnalyzerT const& output_analyzer, typename StatisticT::value_type relative_precision, /*typename StatisticT::value_type confidence_level,*/ typename StatisticT::uint_type max_obs);
+//> make_analyzable_statistic(StatisticT const& stat, DesEngineT const& des_engine, typename StatisticT::value_type relative_precision, typename StatisticT::value_type confidence_level, std::size_t max_obs);
+> make_analyzable_statistic(StatisticT const& stat, DesEngineT const& des_engine, OutputAnalyzerT const& output_analyzer, typename StatisticT::value_type relative_precision, /*typename StatisticT::value_type confidence_level,*/ std::size_t max_obs);
 
 }} // Namespace dcs::des
 

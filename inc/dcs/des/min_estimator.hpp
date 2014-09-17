@@ -30,6 +30,7 @@
 
 
 #include <cmath>
+#include <cstddef>
 #include <cstdlib>
 #include <dcs/debug.hpp>
 #include <dcs/des/base_statistic.hpp>
@@ -47,12 +48,11 @@ namespace dcs { namespace des {
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename ValueT, typename UIntT>
-class min_estimator: public base_statistic<ValueT,UIntT>
+template <typename ValueT>
+class min_estimator: public base_statistic<ValueT>
 {
-	private: typedef base_statistic<ValueT,UIntT> base_type;
+	private: typedef base_statistic<ValueT> base_type;
 	public: typedef ValueT value_type;
-	public: typedef UIntT uint_type;
 	public: typedef min_statistic_category category_type;
 
 
@@ -94,7 +94,7 @@ class min_estimator: public base_statistic<ValueT,UIntT>
 	}
 
 
-	private: uint_type do_num_observations() const
+	private: std::size_t do_num_observations() const
 	{
 		return count_;
 	}
@@ -109,7 +109,7 @@ class min_estimator: public base_statistic<ValueT,UIntT>
 	private: void do_reset()
 	{
 		m_ = ::dcs::math::constants::infinity<value_type>::value;
-		count_ = uint_type(0);
+		count_ = std::size_t(0);
 	}
 
 
@@ -125,7 +125,7 @@ class min_estimator: public base_statistic<ValueT,UIntT>
 	}
 
 
-	private: uint_type count_; ///< Number of observations seen to date.
+	private: std::size_t count_; ///< Number of observations seen to date.
 	private: value_type m_; ///< Accumulator for the minimum value.
 };
 

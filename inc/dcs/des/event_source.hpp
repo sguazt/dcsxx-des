@@ -45,8 +45,8 @@ namespace dcs { namespace des {
 namespace detail { namespace /*<unnamed>*/ {
 
 /// Build an event source name from the event source ID.
-template <typename UIntT>
-inline ::std::string make_name(UIntT id)
+template <typename T>
+::std::string make_name(T const& id)
 {
 	::std::ostringstream oss;
 	oss << "Event Source " << id;
@@ -69,7 +69,6 @@ template <typename RealT=double>
 class event_source
 {
 	public: typedef  RealT real_type;
-	public: typedef  unsigned long uint_type;
 	private: typedef event<real_type> event_type;
 	private: typedef engine_context<real_type> engine_context_type;
 	private: typedef ::boost::signals2::signal<void (event_type const&, engine_context_type&)> signal_type;
@@ -77,7 +76,7 @@ class event_source
 	public: typedef typename ::boost::signals2::connection connection_type;
 
 
-	private: static uint_type counter_;
+	private: static std::size_t counter_;
 
 
 	/// Default constructor.
@@ -127,7 +126,7 @@ class event_source
 	}
 
 
-	public: uint_type id() const
+	public: std::size_t id() const
 	{
 		return id_;
 	}
@@ -191,7 +190,7 @@ class event_source
 	}
 
 
-	private: uint_type id_;
+	private: std::size_t id_;
 	private: ::std::string name_;
 	private: ::boost::shared_ptr<signal_type> ptr_sig_;
 	private: bool enabled_;
@@ -199,7 +198,7 @@ class event_source
 
 
 template <typename RealT>
-typename event_source<RealT>::uint_type event_source<RealT>::counter_ = 0;
+::std::size_t event_source<RealT>::counter_ = 0;
 
 
 template <typename RealT>
@@ -219,7 +218,7 @@ inline bool operator!=(event_source<RealT> const& x, event_source<RealT> const& 
 template <typename RealT>
 inline ::std::size_t hash_value(event_source<RealT> const& et)
 {
-	::dcs::functional::hash<typename event_source<RealT>::uint_type> hasher;
+	::dcs::functional::hash<std::size_t> hasher;
 	return hasher(et.id());
 }
 

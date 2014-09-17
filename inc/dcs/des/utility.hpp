@@ -40,23 +40,23 @@
 
 namespace dcs { namespace des {
 
-template <typename RealT, typename UIntT>
-UIntT num_replications_initial(RealT, RealT, RealT);
+template <typename RealT>
+std::size_t num_replications_initial(RealT, RealT, RealT);
 
-template <typename RealT, typename UIntT>
-UIntT num_replications_initial(RealT, ::dcs::iterator::iterator_range< ::dcs::iterator::any_forward_iterator<RealT> > const&, RealT level);
+template <typename RealT>
+std::size_t num_replications_initial(RealT, ::dcs::iterator::iterator_range< ::dcs::iterator::any_forward_iterator<RealT> > const&, RealT level);
 
-template <typename RealT, typename UIntT>
-UIntT num_replications(RealT, UIntT, RealT, RealT, UIntT);
+template <typename RealT>
+std::size_t num_replications(RealT, std::size_t, RealT, RealT, std::size_t);
 
-template <typename RealT, typename UIntT>
-UIntT num_replications(RealT, UIntT, ::dcs::iterator::iterator_range< ::dcs::iterator::any_forward_iterator<RealT> > const&, RealT, UIntT);
+template <typename RealT>
+std::size_t num_replications(RealT, std::size_t, ::dcs::iterator::iterator_range< ::dcs::iterator::any_forward_iterator<RealT> > const&, RealT, std::size_t);
 
-template <typename RealT, typename UIntT>
-UIntT num_replications(RealT, RealT, RealT, UIntT);
+template <typename RealT>
+std::size_t num_replications(RealT, RealT, RealT, std::size_t);
 
-template <typename RealT, typename UIntT>
-UIntT num_replications(RealT, ::dcs::iterator::iterator_range< ::dcs::iterator::any_forward_iterator<RealT> > const&, RealT, UIntT);
+template <typename RealT>
+std::size_t num_replications(RealT, ::dcs::iterator::iterator_range< ::dcs::iterator::any_forward_iterator<RealT> > const&, RealT, std::size_t);
 
 
 /**
@@ -84,14 +84,14 @@ UIntT num_replications(RealT, ::dcs::iterator::iterator_range< ::dcs::iterator::
  * - \f$\epsilon\f$ is the precision given by \a eps.
  * .
  */
-template <typename RealT, typename UIntT>
-UIntT num_replications_initial(RealT eps, RealT s0, RealT level=0.95)
+template <typename RealT>
+std::size_t num_replications_initial(RealT eps, RealT s0, RealT level=0.95)
 {
 	::dcs::math::stats::normal_distribution<RealT> dist;
 
 	RealT z = dist.quantile((1+level)/RealT(2));
 	RealT r0 = z*s0/eps;
-	return static_cast<UIntT>(::std::ceil(r0*r0));
+	return static_cast<std::size_t>(::std::ceil(r0*r0));
 }
 
 
@@ -121,12 +121,12 @@ UIntT num_replications_initial(RealT eps, RealT s0, RealT level=0.95)
  * - \f$\epsilon\f$ is the precision given by \a eps.
  * .
  */
-template <typename RealT, typename UIntT>
-UIntT num_replications_initial(RealT eps, ::dcs::iterator::iterator_range< ::dcs::iterator::any_forward_iterator<RealT> > const& s0_range, RealT level=0.95)
+template <typename RealT>
+std::size_t num_replications_initial(RealT eps, ::dcs::iterator::iterator_range< ::dcs::iterator::any_forward_iterator<RealT> > const& s0_range, RealT level=0.95)
 {
 	::dcs::math::stats::normal_distribution<RealT> dist;
 
-	UIntT r_max(0);
+	std::size_t r_max(0);
 
 	for (
 		::dcs::iterator::any_forward_iterator<RealT> it = s0_range.begin();
@@ -135,7 +135,7 @@ UIntT num_replications_initial(RealT eps, ::dcs::iterator::iterator_range< ::dcs
 	) {
 //		RealT z = dist.quantile((1+level/RealT(2)));
 //		RealT r0 = z**(*it)/eps;
-//		r_max = ::std::max(static_cast<UIntT>(::std::ceil(r0*r0)), r_max);
+//		r_max = ::std::max(static_cast<std::size_t>(::std::ceil(r0*r0)), r_max);
 		r_max = ::std::max(num_replications_initial(eps, *it, level), r_max);
 	}
 
@@ -171,8 +171,8 @@ UIntT num_replications_initial(RealT eps, ::dcs::iterator::iterator_range< ::dcs
  * - \f$\epsilon\f$ is the precision given by \a eps.
  * .
  */
-template <typename RealT, typename UIntT>
-UIntT num_replications(RealT eps, UIntT r0, RealT s0, RealT level=0.95, UIntT max_trials=::std::numeric_limits<UIntT>::max())
+template <typename RealT>
+std::size_t num_replications(RealT eps, std::size_t r0, RealT s0, RealT level=0.95, std::size_t max_trials=::std::numeric_limits<std::size_t>::max())
 {
 	if (r0 < 2)
 	{
@@ -180,7 +180,7 @@ UIntT num_replications(RealT eps, UIntT r0, RealT s0, RealT level=0.95, UIntT ma
 	}
 
 	RealT r(0);
-	UIntT trial(0);
+	std::size_t trial(0);
 
 	while (r0 < r && trial < max_trials)
 	{
@@ -232,15 +232,15 @@ UIntT num_replications(RealT eps, UIntT r0, RealT s0, RealT level=0.95, UIntT ma
  * The parameter \a max_trials is used for limiting the number of application
  * of the above formula.
  */
-template <typename RealT, typename UIntT>
-UIntT num_replications(RealT eps, UIntT r0, ::dcs::iterator::iterator_range< ::dcs::iterator::any_forward_iterator<RealT> > const& s0_range, RealT level=0.95, UIntT max_trials=::std::numeric_limits<UIntT>::max())
+template <typename RealT>
+std::size_t num_replications(RealT eps, std::size_t r0, ::dcs::iterator::iterator_range< ::dcs::iterator::any_forward_iterator<RealT> > const& s0_range, RealT level=0.95, std::size_t max_trials=::std::numeric_limits<std::size_t>::max())
 {
 	if (r0 < 2)
 	{
 		return r0;
 	}
 
-	UIntT r_max(0);
+	std::size_t r_max(0);
 
 	for (
 		::dcs::iterator::any_forward_iterator<RealT> it = s0_range.begin();
@@ -248,7 +248,7 @@ UIntT num_replications(RealT eps, UIntT r0, ::dcs::iterator::iterator_range< ::d
 		++it
 	) {
 		RealT r(0);
-		UIntT trial(0);
+		std::size_t trial(0);
 
 		do
 		{
@@ -290,11 +290,11 @@ UIntT num_replications(RealT eps, UIntT r0, ::dcs::iterator::iterator_range< ::d
  * from \f$R_0\f$ the final estimate \f$R\f$ is computed (using Student's
  * quantiles).
  */
-template <typename RealT, typename UIntT>
-UIntT num_replications(RealT eps, RealT s0, RealT level=0.95, UIntT max_trials=::std::numeric_limits<UIntT>::max())
+template <typename RealT>
+std::size_t num_replications(RealT eps, RealT s0, RealT level=0.95, std::size_t max_trials=::std::numeric_limits<std::size_t>::max())
 {
-	UIntT r0(0);
-	r0 = num_replications_initial<RealT,UIntT>(eps, s0, level);
+	std::size_t r0(0);
+	r0 = num_replications_initial<RealT,std::size_t>(eps, s0, level);
 
 	return num_replications(eps, r0, s0, level, max_trials);
 }
@@ -319,17 +319,17 @@ UIntT num_replications(RealT eps, RealT s0, RealT level=0.95, UIntT max_trials=:
  * from \f$R_0\f$ the final estimate \f$R\f$ is computed (using Student's
  * quantiles).
  */
-template <typename RealT, typename UIntT>
-UIntT num_replications(RealT eps, ::dcs::iterator::iterator_range< ::dcs::iterator::any_forward_iterator<RealT> > const& s0_range, RealT level=0.95, UIntT max_trials=::std::numeric_limits<UIntT>::max())
+template <typename RealT>
+std::size_t num_replications(RealT eps, ::dcs::iterator::iterator_range< ::dcs::iterator::any_forward_iterator<RealT> > const& s0_range, RealT level=0.95, std::size_t max_trials=::std::numeric_limits<std::size_t>::max())
 {
-	UIntT r_max(0);
+	std::size_t r_max(0);
 
 	for (
 		::dcs::iterator::any_forward_iterator<RealT> it = s0_range.begin();
 		it != s0_range.end();
 		++it
 	) {
-		UIntT r0 = num_replications_initial<RealT,UIntT>(eps, *it, level);
+		std::size_t r0 = num_replications_initial<RealT,std::size_t>(eps, *it, level);
 
 		r_max = ::std::max(num_replications(eps, r0, *it, level, max_trials), r_max);
 	}

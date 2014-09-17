@@ -53,7 +53,6 @@ namespace batch_means {
  *  Batch Means method.
  *
  * \tparam RealT The type used for real numbers.
- * \tparam UIntT The type used for positive integral numbers.
 // * \tparam TransientPhaseDetectorT The default transient phase detector type for
 // *  analyzable output statistics.
 // * \tparam BatchSizeDetectorT The default transient phase detector type for
@@ -72,23 +71,17 @@ namespace batch_means {
  * \author Cosimo Anglano (cosimo.anglano@di.unipmn.it)
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <
-	typename RealT=double,
-	typename UIntT=::std::size_t
->
+template <typename RealT=double>
 class engine: public ::dcs::des::engine<RealT>
 {
 	private: typedef ::dcs::des::engine<RealT> base_type;
 	public: typedef typename base_type::real_type real_type;
-	public: typedef typename base_type::size_type size_type;
 //	public: typedef TransientPhaseDetectorT transient_phase_detector_type;
 //	public: typedef BatchSizeDetectorT batch_size_detector_type;
 	public: typedef typename base_type::event_type event_type;
 	public: typedef typename base_type::engine_context_type engine_context_type;
 	public: typedef typename base_type::event_source_type event_source_type;
 	public: typedef ::dcs::des::batch_means_analysis_category output_analysis_category;
-	private: typedef typename base_type::statistic_type statistic_type;
-	private: typedef typename base_type::analyzable_statistic_pointer analyzable_statistic_pointer;
 
 
 	protected: void prepare_simulation(engine_context_type& ctx)
@@ -133,11 +126,11 @@ class engine: public ::dcs::des::engine<RealT>
 	}
 
 
-	private: analyzable_statistic_pointer do_make_analyzable_statistic(statistic_type const& stat)
+	private: boost::shared_ptr< base_analyzable_statistic<RealT> > do_make_analyzable_statistic(any_statistic<RealT> const& stat)
 	{
-	   typedef ::dcs::des::null_transient_detector<real_type,size_type> transient_detector_type;
-		typedef dummy_batch_size_detector<real_type,size_type> batch_size_detector_type;
-		typedef analyzable_statistic<statistic_type,
+		typedef ::dcs::des::null_transient_detector<real_type> transient_detector_type;
+		typedef dummy_batch_size_detector<real_type> batch_size_detector_type;
+		typedef analyzable_statistic<any_statistic<RealT>,
 									 transient_detector_type,
 									 batch_size_detector_type> analyzable_statistic_impl_type;
 
@@ -147,7 +140,7 @@ class engine: public ::dcs::des::engine<RealT>
 					transient_detector_type(),
 					batch_size_detector_type(),
 					::dcs::math::constants::infinity<real_type>::value,
-					::dcs::math::constants::infinity<size_type>::value
+					::dcs::math::constants::infinity<std::size_t>::value
 				)
 			);
 	}
@@ -176,7 +169,6 @@ struct output_analyzer
 template <
 	typename StatisticT,
 //	typename RealT,
-//	typename UIntT,
 	typename TransientPhaseDetectorT,
 	typename BatchSizeDetectorT
 >
@@ -188,7 +180,6 @@ struct make_analyzable_statistic_type<
 			>//,
 //			batch_means::engine<
 //				RealT,
-//				UIntT,
 //				TransientPhaseDetectorT,
 //				BatchSizeDetectorT
 //			>
@@ -207,7 +198,6 @@ struct make_analyzable_statistic_type<
 template <
 	typename StatisticT,
 	typename RealT,
-	typename UIntT,
 	typename TransientPhaseDetectorT,
 	typename BatchSizeDetectorT
 >
@@ -220,12 +210,11 @@ template <
 		>//,
 //		batch_means::engine<
 //			RealT,
-//			UIntT,
 //			TransientPhaseDetectorT,
 //			BatchSizeDetectorT
 //		>
 	>::type
-> make_analyzable_statistic(StatisticT const& stat, TransientPhaseDetectorT const& transient_detector, BatchSizeDetectorT const& batch_size_detector, batch_means::engine<RealT,UIntT>& des_engine, RealT relative_precision, UIntT max_obs)
+> make_analyzable_statistic(StatisticT const& stat, TransientPhaseDetectorT const& transient_detector, BatchSizeDetectorT const& batch_size_detector, batch_means::engine<RealT>& des_engine, RealT relative_precision, std::size_t max_obs)
 {
 	typedef typename make_analyzable_statistic_type<
 						StatisticT,
@@ -235,13 +224,10 @@ template <
 						>//,
 //						batch_means::engine<
 //							RealT,
-//							UIntT,
 //							TransientPhaseDetectorT,
 //							BatchSizeDetectorT
 //						>
 					>::type statistic_type;
-	typedef TransientPhaseDetectorT transient_phase_detector_type;
-	typedef BatchSizeDetectorT batch_size_detector_type;
 
 	::boost::shared_ptr<statistic_type> ptr_stat(
 			new statistic_type(

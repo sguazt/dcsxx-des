@@ -46,15 +46,17 @@ namespace dcs { namespace des {
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename ValueT, typename UIntT = std::size_t>
-class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
+template <typename ValueT>
+class base_analyzable_statistic: public base_statistic<ValueT>
 {
+	template <typename CT, typename CTT, typename VT>
+	friend ::std::basic_ostream<CT,CTT>& operator<<(::std::basic_ostream<CT,CTT>& os, base_analyzable_statistic<VT> const& stat);
+
 	public: typedef ValueT value_type;
-	public: typedef UIntT uint_type;
-	private: typedef base_statistic<value_type,uint_type> base_type;
+	private: typedef base_statistic<value_type> base_type;
 
 
-	public: static const uint_type num_observations_infinity; ///< Constant to represent an infinite number of observations
+	public: static const std::size_t num_observations_infinity; ///< Constant to represent an infinite number of observations
 	public: static const value_type default_target_relative_precision; ///< Default target relative precision
 
 
@@ -121,7 +123,7 @@ class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
 	 * \brief Returns the maximum number of observations that can be analyzed.
 	 * \return The maximum number of analyzable observations.
 	 */
-	public: uint_type max_num_observations() const
+	public: std::size_t max_num_observations() const
 	{
 		return do_max_num_observations();
 	}
@@ -133,7 +135,7 @@ class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
 	}
 
 	/// Returns the length (in number of observations) of transient phase.
-	public: uint_type transient_phase_length() const
+	public: std::size_t transient_phase_length() const
 	{
 		return do_transient_phase_length();
 	}
@@ -191,7 +193,7 @@ class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
 	 * \brief Returns the maximum number of observations that can be analyzed.
 	 * \return The maximum number of analyzable observations.
 	 */
-	private: virtual uint_type do_max_num_observations() const = 0;
+	private: virtual std::size_t do_max_num_observations() const = 0;
 
 
 	/// Returns \c true if the statistic has entered its steady state.
@@ -199,7 +201,7 @@ class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
 
 
 	/// Returns the length (in number of observations) of transient phase.
-	private: virtual uint_type do_transient_phase_length() const = 0;
+	private: virtual std::size_t do_transient_phase_length() const = 0;
 
 
 	private: virtual value_type do_steady_state_enter_time() const = 0;
@@ -235,29 +237,23 @@ class base_analyzable_statistic: public base_statistic<ValueT,UIntT>
 		refresh();
 	}
 
-
-	public: template <
-					typename CharT,
-					typename CharTraitsT,
-					typename ValueT2,
-					typename UIntT2
-		>
-		friend ::std::basic_ostream<CharT,CharTraitsT>& operator<<(::std::basic_ostream<CharT,CharTraitsT>& os, base_analyzable_statistic<ValueT2,UIntT2> const& stat)
-	{
-		return stat.do_print(os);
-	}
-
-
 //	private: bool enabled_;
 	private: value_type target_rel_prec_; ///< The relative precision to be reached
 }; // base_analyzable_statistic
 
 
-template <typename ValueT, typename UIntT>
-const UIntT base_analyzable_statistic<ValueT,UIntT>::num_observations_infinity = ::dcs::math::constants::infinity<UIntT>::value;
+template <typename ValueT>
+const std::size_t base_analyzable_statistic<ValueT>::num_observations_infinity = ::dcs::math::constants::infinity<std::size_t>::value;
 
-template <typename ValueT, typename UIntT>
-const ValueT base_analyzable_statistic<ValueT,UIntT>::default_target_relative_precision = ::dcs::math::constants::infinity<ValueT>::value;
+template <typename ValueT>
+const ValueT base_analyzable_statistic<ValueT>::default_target_relative_precision = ::dcs::math::constants::infinity<ValueT>::value;
+
+template <typename CharT, typename CharTraitsT, typename ValueT>
+::std::basic_ostream<CharT,CharTraitsT>& operator<<(::std::basic_ostream<CharT,CharTraitsT>& os, base_analyzable_statistic<ValueT> const& stat)
+{
+	return stat.do_print(os);
+}
+
 
 }} // Namespace dcs::des
 

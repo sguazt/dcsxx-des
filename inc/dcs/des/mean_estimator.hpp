@@ -49,12 +49,11 @@ namespace dcs { namespace des {
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename ValueT, typename UIntT = std::size_t>
-class mean_estimator: public base_statistic<ValueT,UIntT>
+template <typename ValueT>
+class mean_estimator: public base_statistic<ValueT>
 {
-	private: typedef base_statistic<ValueT,UIntT> base_type;
+	private: typedef base_statistic<ValueT> base_type;
 	public: typedef ValueT value_type;
-	public: typedef UIntT uint_type;
 	public: typedef mean_statistic_category category_type;
 
 
@@ -106,7 +105,7 @@ class mean_estimator: public base_statistic<ValueT,UIntT>
 	}
 
 
-	private: uint_type do_num_observations() const
+	private: std::size_t do_num_observations() const
 	{
 		return count_;
 	}
@@ -127,7 +126,7 @@ class mean_estimator: public base_statistic<ValueT,UIntT>
 	{
 		m1_ = m2_
 			= value_type(0);
-		count_ = uint_type(0);
+		count_ = std::size_t(0);
 	}
 
 
@@ -147,7 +146,7 @@ class mean_estimator: public base_statistic<ValueT,UIntT>
 
 
 	/// Number of observations seen to date.
-	private: uint_type count_;
+	private: std::size_t count_;
 	/// Accumulator for the mean value.
 	private: value_type m1_;
 	/// Accumulator for the variance.

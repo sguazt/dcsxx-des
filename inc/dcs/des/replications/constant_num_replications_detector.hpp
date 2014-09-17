@@ -30,6 +30,7 @@
 #define DCS_DES_REPLICATIONS_CONSTANT_NUM_REPLICATIONS_DETECTOR_HPP
 
 
+#include <cstddef>
 #include <dcs/macro.hpp>
 #include <dcs/math/constants.hpp>
 //#include <vector>
@@ -37,28 +38,24 @@
 
 namespace dcs { namespace des { namespace replications {
 
-template <
-	typename RealT,
-	typename UIntT
->
+template <typename RealT>
 class constant_num_replications_detector
 {
 	public: typedef RealT real_type;
-	public: typedef UIntT uint_type;
 //	public: typedef ::std::vector<real_type> vector_type;
 
 
-	public: static const uint_type default_num_replications; // = ::dcs::math::constants::infinity<uint_type>::value;
+	public: static const std::size_t default_num_replications; // = ::dcs::math::constants::infinity<std::size_t>::value;
 
 
-	public: explicit constant_num_replications_detector(uint_type num_repl=default_num_replications)
+	public: explicit constant_num_replications_detector(std::size_t num_repl=default_num_replications)
 		: r_(num_repl)
 	{
 		// Empty
 	}
 
 
-	public: bool detect(uint_type r_cur, real_type estimate, real_type stddev)
+	public: bool detect(std::size_t r_cur, real_type estimate, real_type stddev)
 	{
 		DCS_MACRO_SUPPRESS_UNUSED_VARIABLE_WARNING( r_cur );
 		DCS_MACRO_SUPPRESS_UNUSED_VARIABLE_WARNING( estimate );
@@ -82,7 +79,7 @@ class constant_num_replications_detector
 	}
 
 
-	public: uint_type estimated_number() const
+	public: std::size_t estimated_number() const
 	{
 		return r_;
 	}
@@ -101,12 +98,12 @@ class constant_num_replications_detector
 
 
 	/// The actual number of replications
-	private: uint_type r_;
+	private: std::size_t r_;
 //	private: vector_type estimators_;
 };
 
-template <typename RealT, typename UIntT>
-const UIntT constant_num_replications_detector<RealT,UIntT>::default_num_replications = ::dcs::math::constants::infinity<UIntT>::value;
+template <typename RealT>
+const std::size_t constant_num_replications_detector<RealT>::default_num_replications = ::dcs::math::constants::infinity<std::size_t>::value;
 
 }}} // Namespace dcs::des::replications
 

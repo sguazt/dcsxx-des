@@ -42,25 +42,23 @@ namespace dcs { namespace des { namespace replications {
  * \brief Replication size detector based on a fixed number of observations.
  *
  * \tparam RealT The type used for real numbers.
- * \tparam UIntT The type used for unsigned integral numbers.
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename RealT, typename UIntT = std::size_t>
+template <typename RealT>
 class fixed_num_obs_replication_size_detector
 {
 	public: typedef RealT real_type;
-	public: typedef UIntT uint_type;
 	public: typedef ::std::pair<real_type,real_type> sample_type;
 	public: typedef ::std::vector<sample_type> vector_type;
 
 
 	/// Constant for setting the duration of replication size determination
 	/// to infinity.
-	public: static const uint_type num_obs_infinity; // = ::dcs::math::constants::infinity<uint_type>::value;
+	public: static const std::size_t num_obs_infinity; // = ::dcs::math::constants::infinity<std::size_t>::value;
 
 
-	public: static const uint_type default_num_obs = 1000;
+	public: static const std::size_t default_num_obs = 1000;
 
 
 	/**
@@ -68,7 +66,7 @@ class fixed_num_obs_replication_size_detector
 	 *
 	 * \param n_obs The number of observations to collect.
 	 */
-	public: explicit fixed_num_obs_replication_size_detector(uint_type num_obs)
+	public: explicit fixed_num_obs_replication_size_detector(std::size_t num_obs)
 		: num_obs_(num_obs)//,
 //		  detect_aborted_(false)
 //		  detected_(true)
@@ -135,7 +133,7 @@ class fixed_num_obs_replication_size_detector
 	}
 
 
-	public: uint_type estimated_size() const
+	public: std::size_t estimated_size() const
 	{
 //		return obs_.size();
 		return num_obs_;
@@ -149,7 +147,7 @@ class fixed_num_obs_replication_size_detector
 
 
 	/// Number of observations
-	private: uint_type num_obs_;
+	private: std::size_t num_obs_;
 //	/// Tells if replication size detection has been aborted without finding a
 //	/// right replication size.
 //	private: bool detect_aborted_;
@@ -158,8 +156,8 @@ class fixed_num_obs_replication_size_detector
 	private: vector_type obs_;
 };
 
-template <typename RealT, typename UIntT>
-const UIntT fixed_num_obs_replication_size_detector<RealT,UIntT>::num_obs_infinity = ::dcs::math::constants::infinity<UIntT>::value;
+template <typename RealT>
+const std::size_t fixed_num_obs_replication_size_detector<RealT>::num_obs_infinity = ::dcs::math::constants::infinity<std::size_t>::value;
 
 }}} // Namespace dcs::des::replications
 

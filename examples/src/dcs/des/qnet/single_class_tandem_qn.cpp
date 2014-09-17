@@ -92,13 +92,9 @@ int main()
 	typedef double real_type;
 	typedef std::size_t uint_type;
 	typedef dcs::math::random::mt19937 random_generator_type;
-	typedef dcs::des::replications::engine<real_type,uint_type> des_engine_type;
-	typedef typename dcs::des::engine_traits<des_engine_type>::event_type event_type;
-	typedef typename dcs::des::engine_traits<des_engine_type>::engine_context_type engine_context_type;
-	typedef dcs::des::base_statistic<real_type,uint_type> statistic_type;
-	typedef dcs::des::base_analyzable_statistic<real_type,uint_type> analyzable_statistic_type;
-	typedef dcs::des::model::qn::queueing_network<uint_type,
-												  real_type,
+	typedef dcs::des::replications::engine<real_type> des_engine_type;
+	typedef dcs::des::base_analyzable_statistic<real_type> analyzable_statistic_type;
+	typedef dcs::des::model::qn::queueing_network<real_type,
 												  random_generator_type,
 												  des_engine_type> network_type;
 	typedef dcs::des::model::qn::queueing_network_traits<network_type> network_traits_type;
@@ -128,7 +124,9 @@ int main()
 	const uint_type replication_length(100);
 	const uint_type num_replications(5);
 	const uint_type num_servers(1);
+#if SINGLE_CLASS_TANDEM_SCHEDULING_POLICY == SINGLE_CLASS_TANDEM_RR_POLICY
 	const real_type quantum(0.01);
+#endif // SINGLE_CLASS_TANDEM_SCHEDULING_POLICY
 	const real_type arr_rate(5.3);
 	const real_type web_svc_time(0.03);
 	const real_type app_svc_time(0.06);
@@ -232,65 +230,65 @@ int main()
 
 	// - Network-level statistics
 
-	dcs::shared_ptr<analyzable_statistic_type> ptr_rt_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
-//	dcs::shared_ptr<analyzable_statistic_type> ptr_rt_stat = ptr_eng->make_analyzable_statistic(dcs::des::quantile_estimator<real_type,uint_type>(0.99));
+	dcs::shared_ptr<analyzable_statistic_type> ptr_rt_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
+//	dcs::shared_ptr<analyzable_statistic_type> ptr_rt_stat = ptr_eng->make_analyzable_statistic(dcs::des::quantile_estimator<real_type>(0.99));
 	qn.statistic(dcs::des::model::qn::net_response_time_statistic_category, ptr_rt_stat);
 
-	dcs::shared_ptr<analyzable_statistic_type> ptr_tput_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
-//	dcs::shared_ptr<analyzable_statistic_type> ptr_tput_stat = ptr_eng->make_analyzable_statistic(dcs::des::quantile_estimator<real_type,uint_type>(0.99));
+	dcs::shared_ptr<analyzable_statistic_type> ptr_tput_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
+//	dcs::shared_ptr<analyzable_statistic_type> ptr_tput_stat = ptr_eng->make_analyzable_statistic(dcs::des::quantile_estimator<real_type>(0.99));
 	qn.statistic(dcs::des::model::qn::net_throughput_statistic_category, ptr_tput_stat);
 
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.statistic(dcs::des::model::qn::net_num_arrivals_statistic_category, ptr_stat);
 
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.statistic(dcs::des::model::qn::net_num_departures_statistic_category, ptr_stat);
 
 	// - Node-level statistics
 
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(WEB_SERVER_NODE).statistic(dcs::des::model::qn::num_arrivals_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(WEB_SERVER_NODE).statistic(dcs::des::model::qn::num_departures_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(WEB_SERVER_NODE).statistic(dcs::des::model::qn::busy_time_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(WEB_SERVER_NODE).statistic(dcs::des::model::qn::response_time_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(WEB_SERVER_NODE).statistic(dcs::des::model::qn::throughput_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(WEB_SERVER_NODE).statistic(dcs::des::model::qn::num_waiting_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(WEB_SERVER_NODE).statistic(dcs::des::model::qn::utilization_statistic_category, ptr_stat);
 
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(APP_SERVER_NODE).statistic(dcs::des::model::qn::num_arrivals_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(APP_SERVER_NODE).statistic(dcs::des::model::qn::num_departures_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(APP_SERVER_NODE).statistic(dcs::des::model::qn::busy_time_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(APP_SERVER_NODE).statistic(dcs::des::model::qn::response_time_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(APP_SERVER_NODE).statistic(dcs::des::model::qn::throughput_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(APP_SERVER_NODE).statistic(dcs::des::model::qn::num_waiting_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(APP_SERVER_NODE).statistic(dcs::des::model::qn::utilization_statistic_category, ptr_stat);
 
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(DB_SERVER_NODE).statistic(dcs::des::model::qn::num_arrivals_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(DB_SERVER_NODE).statistic(dcs::des::model::qn::num_departures_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(DB_SERVER_NODE).statistic(dcs::des::model::qn::busy_time_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(DB_SERVER_NODE).statistic(dcs::des::model::qn::response_time_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(DB_SERVER_NODE).statistic(dcs::des::model::qn::throughput_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(DB_SERVER_NODE).statistic(dcs::des::model::qn::num_waiting_statistic_category, ptr_stat);
-	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type,uint_type>());
+	ptr_stat = ptr_eng->make_analyzable_statistic(dcs::des::mean_estimator<real_type>());
 	qn.get_node(DB_SERVER_NODE).statistic(dcs::des::model::qn::utilization_statistic_category, ptr_stat);
 
 

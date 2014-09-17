@@ -56,7 +56,6 @@ class service_station_node: public network_node<TraitsT>
 	public: typedef typename base_type::identifier_type identifier_type;
 	public: typedef typename base_type::customer_pointer customer_pointer;
 	public: typedef typename base_type::real_type real_type;
-	public: typedef typename base_type::uint_type uint_type;//[sguazt] EXP
 	private: typedef typename base_type::event_type event_type;
 	private: typedef typename base_type::engine_context_type engine_context_type;
 	public: typedef typename base_type::event_source_type event_source_type;
@@ -70,7 +69,7 @@ class service_station_node: public network_node<TraitsT>
 	public: typedef ::boost::shared_ptr<routing_strategy_type> routing_strategy_pointer;
 	private: typedef typename service_strategy_type::runtime_info_type runtime_info_type;
 	private: typedef ::boost::shared_ptr<event_type> event_pointer;
-	private: typedef ::std::map<uint_type,event_pointer> customer_event_map;
+	private: typedef ::std::map<std::size_t,event_pointer> customer_event_map;
 
 
 	private: static const ::std::string service_event_source_name;

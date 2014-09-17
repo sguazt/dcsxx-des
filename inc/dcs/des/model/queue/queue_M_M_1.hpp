@@ -48,14 +48,12 @@ namespace dcs { namespace des { namespace model {
  */
 template <
 	typename RealT=double,
-	typename UIntT=::std::size_t,
 	typename UniformRandomGeneratorT=::dcs::math::random::any_generator<RealT>,
 	typename DesEngineT=::dcs::des::engine<RealT>,
-	typename OutputStatisticT=::dcs::des::any_statistic<RealT,UIntT>
+	typename OutputStatisticT=::dcs::des::any_statistic<RealT>
 >
 class queue_M_M_1: public open_queue<
 							RealT,
-							UIntT,
 							::dcs::math::stats::exponential_distribution<RealT>,
 							::dcs::math::stats::exponential_distribution<RealT>,
 							UniformRandomGeneratorT,
@@ -65,7 +63,6 @@ class queue_M_M_1: public open_queue<
 					>
 {
 	public: typedef RealT real_type;
-	public: typedef UIntT uint_type;
 	public: typedef ::dcs::math::stats::exponential_distribution<real_type> iatime_distribution_type;
 	public: typedef ::dcs::math::stats::exponential_distribution<real_type> service_distribution_type;
 	public: typedef UniformRandomGeneratorT random_generator_type;
@@ -74,7 +71,6 @@ class queue_M_M_1: public open_queue<
 	public: typedef OutputStatisticT output_statistic_type;
 	private: typedef open_queue<
 						real_type,
-						uint_type,
 						iatime_distribution_type,
 						service_distribution_type,
 						random_generator_type,

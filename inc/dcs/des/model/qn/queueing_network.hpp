@@ -68,7 +68,6 @@ namespace dcs { namespace des { namespace model { namespace qn {
 * \author Marco Guazzone (marco.guazzone@gmail.com)
 */
 template <
-typename UIntT,
 typename RealT,
 typename UniformRandomGeneratorT,
 typename DesEngineT/*,
@@ -76,14 +75,13 @@ typename ClassT = customer_class,
 typename NodeT = network_node,
 typename PrioriryT = int*/
 >
-class queueing_network: public ::dcs::des::entity//, public dcs::enable_shared_from_this< queueing_network<UIntT,RealT,UniformRandomGeneratorT,DesEngineT> >
+class queueing_network: public ::dcs::des::entity//, public dcs::enable_shared_from_this< queueing_network<RealT,UniformRandomGeneratorT,DesEngineT> >
 {
 	//@{ Typedefs
 
 
 	private: typedef ::dcs::des::entity base_type;
 	private: typedef queueing_network<
-						UIntT,
 						RealT,
 						UniformRandomGeneratorT,
 						DesEngineT/*,
@@ -91,7 +89,6 @@ class queueing_network: public ::dcs::des::entity//, public dcs::enable_shared_f
 						NodeT,
 						PriorityT*/> self_type;
 	private: typedef queueing_network_traits<self_type> traits_type;
-	public: typedef UIntT uint_type;
 	public: typedef RealT real_type;
 	public: typedef UniformRandomGeneratorT random_generator_type;
 	public: typedef DesEngineT engine_type;
@@ -115,7 +112,7 @@ class queueing_network: public ::dcs::des::entity//, public dcs::enable_shared_f
 	public: typedef node_size_type node_identifier_type;
 	public: typedef ::boost::shared_ptr<random_generator_type> random_generator_pointer;
 	public: typedef ::boost::shared_ptr<engine_type> engine_pointer;
-	public: typedef base_statistic<real_type,uint_type> output_statistic_type;
+	public: typedef base_statistic<real_type> output_statistic_type;
 	public: typedef ::boost::shared_ptr<output_statistic_type> output_statistic_pointer;
 	private: typedef ::std::vector<node_identifier_type> node_id_container;
 	private: typedef ::std::vector<node_id_container> class_node_container;
@@ -804,21 +801,21 @@ class queueing_network: public ::dcs::des::entity//, public dcs::enable_shared_f
 
 
 	/// Return the overall number of arrived customers.
-	public: uint_type num_arrivals() const
+	public: std::size_t num_arrivals() const
 	{
 		return narr_;
 	}
 
 
 	/// Return the overall number of (successfully) departed customers.
-	public: uint_type num_departures() const
+	public: std::size_t num_departures() const
 	{
 		return ndep_;
 	}
 
 
 	/// Return the overall number of discarded customers.
-	public: uint_type num_discards() const
+	public: std::size_t num_discards() const
 	{
 		return ndis_;
 	}
@@ -1116,10 +1113,6 @@ class queueing_network: public ::dcs::des::entity//, public dcs::enable_shared_f
 	/// Check if the given statistic category is valid.
 	private: bool check_stat(network_output_statistic_category category) const
 	{
-		typedef typename output_statistic_category_container::size_type size_type;
-
-//		return stats_.size() > static_cast<size_type>(category)
-//				   && stats_[category].size() > 0;
 		return stats_.count(category) > 0
 			   && !stats_.at(category).empty();
 	}
@@ -1238,7 +1231,7 @@ class queueing_network: public ::dcs::des::entity//, public dcs::enable_shared_f
 		// Reset experiment-level stats
 		narr_ = ndep_
 			  = ndis_
-			  = uint_type/*zero*/();
+			  = std::size_t/*zero*/();
 
 		// Reset nodes
 		{
@@ -1491,11 +1484,11 @@ class queueing_network: public ::dcs::des::entity//, public dcs::enable_shared_f
 	/// NETWORK-DISCARD event source: discard of a customer from the network
 	private: event_source_pointer ptr_dis_evt_src_;
 	/// The overall number of arrived customers.
-	private: uint_type narr_;
+	private: std::size_t narr_;
 	/// The overall number of (successully) departed customers.
-	private: uint_type ndep_;
+	private: std::size_t ndep_;
 	/// The overall number of discarded customers.
-	private: uint_type ndis_;
+	private: std::size_t ndis_;
 	/// Output statistics grouped by their category.
 	private: output_statistic_category_container stats_;
 
@@ -1505,48 +1498,43 @@ class queueing_network: public ::dcs::des::entity//, public dcs::enable_shared_f
 
 
 template <
-	typename UIntT,
 	typename RealT,
 	typename UniformRandomGeneratorT,
 	typename DesEngineT
 >
-const typename queueing_network<UIntT,RealT,UniformRandomGeneratorT,DesEngineT>::class_identifier_type queueing_network<UIntT,RealT,UniformRandomGeneratorT,DesEngineT>::invalid_class_id = ::std::numeric_limits<typename queueing_network<UIntT,RealT,UniformRandomGeneratorT,DesEngineT>::class_identifier_type>::max();
+const typename queueing_network<RealT,UniformRandomGeneratorT,DesEngineT>::class_identifier_type queueing_network<RealT,UniformRandomGeneratorT,DesEngineT>::invalid_class_id = ::std::numeric_limits<typename queueing_network<RealT,UniformRandomGeneratorT,DesEngineT>::class_identifier_type>::max();
 
 
 template <
-	typename UIntT,
 	typename RealT,
 	typename UniformRandomGeneratorT,
 	typename DesEngineT
 >
-const typename queueing_network<UIntT,RealT,UniformRandomGeneratorT,DesEngineT>::node_identifier_type queueing_network<UIntT,RealT,UniformRandomGeneratorT,DesEngineT>::invalid_node_id = ::std::numeric_limits<typename queueing_network<UIntT,RealT,UniformRandomGeneratorT,DesEngineT>::node_identifier_type>::max();
+const typename queueing_network<RealT,UniformRandomGeneratorT,DesEngineT>::node_identifier_type queueing_network<RealT,UniformRandomGeneratorT,DesEngineT>::invalid_node_id = ::std::numeric_limits<typename queueing_network<RealT,UniformRandomGeneratorT,DesEngineT>::node_identifier_type>::max();
 
 
 template <
-	typename UIntT,
 	typename RealT,
 	typename UniformRandomGeneratorT,
 	typename DesEngineT
 >
-const ::std::string queueing_network<UIntT,RealT,UniformRandomGeneratorT,DesEngineT>::arrival_event_source_name("Arrival to Network");
+const ::std::string queueing_network<RealT,UniformRandomGeneratorT,DesEngineT>::arrival_event_source_name("Arrival to Network");
 
 
 template <
-	typename UIntT,
 	typename RealT,
 	typename UniformRandomGeneratorT,
 	typename DesEngineT
 >
-const ::std::string queueing_network<UIntT,RealT,UniformRandomGeneratorT,DesEngineT>::departure_event_source_name("Departure from Network");
+const ::std::string queueing_network<RealT,UniformRandomGeneratorT,DesEngineT>::departure_event_source_name("Departure from Network");
 
 
 template <
-	typename UIntT,
 	typename RealT,
 	typename UniformRandomGeneratorT,
 	typename DesEngineT
 >
-const ::std::string queueing_network<UIntT,RealT,UniformRandomGeneratorT,DesEngineT>::discard_event_source_name("Discard from Network");
+const ::std::string queueing_network<RealT,UniformRandomGeneratorT,DesEngineT>::discard_event_source_name("Discard from Network");
 
 }}}} // Namespace dcs::des::model::qn
 

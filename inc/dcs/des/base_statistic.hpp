@@ -49,11 +49,13 @@ namespace dcs { namespace des {
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename ValueT, typename UIntT = std::size_t>
+template <typename ValueT>
 class base_statistic
 {
+	template <typename CT, typename CTT, typename VT>
+	friend ::std::basic_ostream<CT,CTT>& operator<<(::std::basic_ostream<CT,CTT>& os, base_statistic<VT> const& stat);
+
 	public: typedef ValueT value_type;
-	public: typedef UIntT uint_type;
 
 
 	public: static const value_type default_confidence_level;
@@ -91,7 +93,7 @@ class base_statistic
 		do_reset();
 	}
 
-	public: uint_type num_observations() const
+	public: std::size_t num_observations() const
 	{
 		return do_num_observations();
 	}
@@ -175,7 +177,7 @@ class base_statistic
 
 	private: virtual void do_reset() = 0;
 
-	private: virtual uint_type do_num_observations() const = 0;
+	private: virtual std::size_t do_num_observations() const = 0;
 
 	private: virtual value_type do_estimate() const = 0;
 
@@ -214,17 +216,6 @@ class base_statistic
 
 	///@} Interface methods
 
-	public: template <
-				typename CharT,
-				typename CharTraitsT,
-				typename ValueT2,
-				typename UIntT2
-		>
-		friend ::std::basic_ostream<CharT,CharTraitsT>& operator<<(::std::basic_ostream<CharT,CharTraitsT>& os, base_statistic<ValueT2,UIntT2> const& stat)
-	{
-		return stat.do_print(os);
-	}
-
 
 	private: value_type ci_level_;
 	private: std::string name_;
@@ -232,12 +223,18 @@ class base_statistic
 }; // base_statistic
 
 
-template <typename ValueT, typename UIntT>
-const ValueT base_statistic<ValueT,UIntT>::default_confidence_level = static_cast<ValueT>(0.95);
+template <typename ValueT>
+const ValueT base_statistic<ValueT>::default_confidence_level = static_cast<ValueT>(0.95);
 
-template <typename ValueT, typename UIntT>
-const std::string base_statistic<ValueT,UIntT>::default_name = "Unnamed";
+template <typename ValueT>
+const std::string base_statistic<ValueT>::default_name = "Unnamed";
 
+
+template <typename CharT, typename CharTraitsT, typename ValueT>
+::std::basic_ostream<CharT,CharTraitsT>& operator<<(::std::basic_ostream<CharT,CharTraitsT>& os, base_statistic<ValueT> const& stat)
+{
+	return stat.do_print(os);
+}
 
 }} // Namespace dcs::des
 

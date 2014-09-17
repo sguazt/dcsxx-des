@@ -52,24 +52,23 @@
 
 namespace dcs { namespace des { namespace replications {
 
-template <typename RealT, typename UIntT = std::size_t>
+template <typename RealT>
 class banks2005_num_replications_detector
 {
 	public: typedef RealT real_type;
-	public: typedef UIntT uint_type;
 //	public: typedef ::std::vector<real_type> vector_type;
 
 
 	public: static const real_type default_ci_level; // = 0.95
 	public: static const real_type default_relative_precision; // = 0.04
-	public: static const uint_type default_min_num_replications = 2;
-	public: static const uint_type default_max_num_replications; // = ::dcs::math::constants::infinity<uint_type>::value;
+	public: static const std::size_t default_min_num_replications = 2;
+	public: static const std::size_t default_max_num_replications; // = ::dcs::math::constants::infinity<std::size_t>::value;
 
 
 	public: explicit banks2005_num_replications_detector(real_type ci_level = default_ci_level,
 														 real_type rel_prec = default_relative_precision,
-														 uint_type min_num_repl = default_min_num_replications,
-														 uint_type max_num_repl = default_max_num_replications)
+														 std::size_t min_num_repl = default_min_num_replications,
+														 std::size_t max_num_repl = default_max_num_replications)
 	: ci_level_(ci_level),
 	  rel_prec_(rel_prec),
 	  r_min_(min_num_repl),
@@ -90,7 +89,7 @@ class banks2005_num_replications_detector
 	}
 
 
-	public: bool detect(uint_type r_cur, real_type estimate, real_type stddev)
+	public: bool detect(std::size_t r_cur, real_type estimate, real_type stddev)
 	{
 		if (r_cur < r_min_)
 		{
@@ -128,7 +127,7 @@ class banks2005_num_replications_detector
 
 			::boost::math::normal_distribution<real_type> norm;
 			const real_type z = ::boost::math::quantile(norm, half_alpha);
-			r_ =  static_cast<uint_type>(::dcs::math::sqr(z*stddev/(rel_prec_*estimate)));
+			r_ =  static_cast<std::size_t>(::dcs::math::sqr(z*stddev/(rel_prec_*estimate)));
 
 			if (r_ < r_min_)
 			{
@@ -181,7 +180,7 @@ DCS_DEBUG_TRACE("(" << this << ") Detecting Sample Size --> " << ::std::boolalph
 	}
 
 
-	public: uint_type estimated_number() const
+	public: std::size_t estimated_number() const
 	{
 		return r_;
 	}
@@ -205,23 +204,23 @@ DCS_DEBUG_TRACE("(" << this << ") Detecting Sample Size --> " << ::std::boolalph
 
 	private: real_type ci_level_; ///< The confidence level
 	private: real_type rel_prec_; ///< The target relative precision to reach.
-	private: uint_type r_min_; ///< The minimum number of replications to perform
-	private: uint_type r_max_; ///< The maximum number of replications to perform
-	private: uint_type r_; ///< The actual detected number of replications to perform
+	private: std::size_t r_min_; ///< The minimum number of replications to perform
+	private: std::size_t r_max_; ///< The maximum number of replications to perform
+	private: std::size_t r_; ///< The actual detected number of replications to perform
 	private: bool detected_;
 	private: bool aborted_;
 	private: bool first_call_;
 //	private: vector_type estimators_;
 };
 
-template <typename RealT, typename UIntT>
-const UIntT banks2005_num_replications_detector<RealT,UIntT>::default_max_num_replications = ::dcs::math::constants::infinity<UIntT>::value;
+template <typename RealT>
+const std::size_t banks2005_num_replications_detector<RealT>::default_max_num_replications = ::dcs::math::constants::infinity<std::size_t>::value;
 
-template <typename RealT, typename UIntT>
-const RealT banks2005_num_replications_detector<RealT,UIntT>::default_ci_level = 0.95;
+template <typename RealT>
+const RealT banks2005_num_replications_detector<RealT>::default_ci_level = 0.95;
 
-template <typename RealT, typename UIntT>
-const RealT banks2005_num_replications_detector<RealT,UIntT>::default_relative_precision = 0.04;
+template <typename RealT>
+const RealT banks2005_num_replications_detector<RealT>::default_relative_precision = 0.04;
 
 }}} // Namespace dcs::des::replications
 

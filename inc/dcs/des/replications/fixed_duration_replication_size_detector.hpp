@@ -32,6 +32,7 @@
 #include <boost/smart_ptr.hpp>
 #include <cstddef>
 #include <dcs/debug.hpp>
+#include <dcs/des/engine.hpp>
 #include <dcs/math/constants.hpp>
 #include <utility>
 #include <vector>
@@ -43,17 +44,14 @@ namespace dcs { namespace des { namespace replications {
  * \brief Replication of fixed length.
  *
  * \tparam RealT The type used for real numbers.
- * \tparam UIntT The type used for unsigned integral numbers.
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
 template <typename RealT,
-		  typename UIntT = std::size_t,
 		  typename DesEngineT = dcs::des::engine<RealT> >
 class fixed_duration_replication_size_detector
 {
 	public: typedef RealT real_type;
-	public: typedef UIntT uint_type;
 	public: typedef DesEngineT des_engine_type;
 	//public: typedef ::boost::shared_ptr<des_engine_type> des_engine_pointer;
 	public: typedef des_engine_type* des_engine_pointer;
@@ -137,7 +135,7 @@ class fixed_duration_replication_size_detector
 	}
 
 
-	public: uint_type estimated_size() const
+	public: std::size_t estimated_size() const
 	{
 		return obs_.size();
 	}

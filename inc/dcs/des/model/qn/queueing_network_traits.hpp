@@ -50,7 +50,6 @@ struct queueing_network_traits
 	typedef typename QueueNetT::random_generator_pointer random_generator_pointer;
 	typedef typename QueueNetT::random_generator_type random_generator_type;
 	typedef typename QueueNetT::real_type real_type;
-	typedef typename QueueNetT::uint_type uint_type;
 //	typedef typename engine_type::event_source_type event_source_type;
 //	typedef typename engine_type::event_type event_type;
 //	typedef typename engine_type::engine_context_type engine_context_type;

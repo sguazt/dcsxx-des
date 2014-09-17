@@ -29,6 +29,7 @@
 #define DCS_DES_ANALYZABLE_STATISTIC_ADAPTOR_HPP
 
 
+#include <cstddef>
 #include <dcs/des/base_analyzable_statistic.hpp>
 #include <dcs/type_traits/add_const.hpp>
 #include <dcs/type_traits/add_reference.hpp>
@@ -42,14 +43,10 @@ template <
 	typename StatisticT,
 	typename StatisticTraitsT=typename ::dcs::type_traits::remove_reference<StatisticT>::type
 >
-class analyzable_statistic_adaptor: public base_analyzable_statistic<
-							typename StatisticTraitsT::value_type,
-							typename StatisticTraitsT::uint_type
-						>
+class analyzable_statistic_adaptor: public base_analyzable_statistic<typename StatisticTraitsT::value_type>
 {
 	public: typedef StatisticT adaptee_type;
 	public: typedef typename StatisticTraitsT::value_type value_type;
-	public: typedef typename StatisticTraitsT::uint_type uint_type;
 	public: typedef typename ::dcs::type_traits::add_reference<StatisticT>::type adaptee_reference;
 	public: typedef typename ::dcs::type_traits::add_reference<
 									typename ::dcs::type_traits::add_const<StatisticT>::type
@@ -75,7 +72,7 @@ class analyzable_statistic_adaptor: public base_analyzable_statistic<
 	}
 
 
-    public: virtual uint_type do_num_observations() const
+    public: virtual std::size_t do_num_observations() const
 	{
 		return adaptee_.num_observations();
 	}
@@ -134,7 +131,7 @@ class analyzable_statistic_adaptor: public base_analyzable_statistic<
 		return adaptee_.disabled();
 	}
 
-	private: virtual uint_type do_max_num_observations() const
+	private: virtual std::size_t do_max_num_observations() const
 	{
 		return adaptee_.max_num_observations();
 	}
@@ -146,7 +143,7 @@ class analyzable_statistic_adaptor: public base_analyzable_statistic<
 	}
 
 
-	private: virtual uint_type do_transient_phase_length() const
+	private: virtual std::size_t do_transient_phase_length() const
 	{
 		return adaptee_.transient_phase_length();
 	}

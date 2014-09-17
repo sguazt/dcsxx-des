@@ -43,14 +43,10 @@ template <
 	typename StatisticT,
 	typename StatisticTraitsT=typename ::dcs::type_traits::remove_reference<StatisticT>::type
 >
-class statistic_adaptor: public base_statistic<
-							typename StatisticTraitsT::value_type,
-							typename StatisticTraitsT::uint_type
-						>
+class statistic_adaptor: public base_statistic<typename StatisticTraitsT::value_type>
 {
 	public: typedef StatisticT adaptee_type;
 	public: typedef typename StatisticTraitsT::value_type value_type;
-	public: typedef typename StatisticTraitsT::uint_type uint_type;
 	public: typedef typename ::dcs::type_traits::add_reference<StatisticT>::type adaptee_reference;
 	public: typedef typename ::dcs::type_traits::add_reference<
 									typename ::dcs::type_traits::add_const<StatisticT>::type
@@ -88,7 +84,7 @@ class statistic_adaptor: public base_statistic<
 	}
 
 
-    private: uint_type do_num_observations() const
+    private: std::size_t do_num_observations() const
 	{
 		return adaptee_.num_observations();
 	}

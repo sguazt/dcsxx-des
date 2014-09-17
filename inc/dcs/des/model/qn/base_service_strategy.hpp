@@ -30,6 +30,7 @@
 
 
 #include <boost/smart_ptr.hpp>
+#include <cstddef>
 #include <dcs/debug.hpp>
 #include <dcs/des/model/qn/queueing_network_traits.hpp>
 #include <dcs/des/model/qn/runtime_info.hpp>
@@ -49,7 +50,6 @@ class base_service_strategy
 {
 	public: typedef TraitsT traits_type;
 	public: typedef typename traits_type::real_type real_type;
-	public: typedef typename traits_type::uint_type uint_type;
 	public: typedef typename traits_type::random_generator_type random_generator_type;
 	public: typedef typename traits_type::customer_type customer_type;
 	public: typedef ::boost::shared_ptr<customer_type> customer_pointer;
@@ -315,13 +315,13 @@ class base_service_strategy
 	}
 
 
-	public: uint_type num_servers() const
+	public: std::size_t num_servers() const
 	{
 		return do_num_servers();
 	}
 
 
-	public: uint_type num_busy_servers() const
+	public: std::size_t num_busy_servers() const
 	{
 		return do_num_busy_servers();
 	}
@@ -422,10 +422,10 @@ class base_service_strategy
 	private: virtual void do_reset() = 0;
 
 
-	private: virtual uint_type do_num_servers() const = 0;
+	private: virtual std::size_t do_num_servers() const = 0;
 
 
-	private: virtual uint_type do_num_busy_servers() const = 0;
+	private: virtual std::size_t do_num_busy_servers() const = 0;
 
 	//@} Interface member functions
 

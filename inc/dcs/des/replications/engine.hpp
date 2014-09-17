@@ -56,32 +56,25 @@ namespace dcs { namespace des {
 
 namespace replications {
 
-template <typename RealT, typename UIntT = std::size_t>
+template <typename RealT>
 class engine: public ::dcs::des::engine<RealT>
 {
 	private: typedef ::dcs::des::engine<RealT> base_type;
-	private: typedef engine<RealT,UIntT> self_type;
-//	public: typedef TransientPhaseDetectorT transient_phase_detector_type;
-//	public: typedef ReplicationSizeDetectorT replication_size_detector_type;
-//	public: typedef NumReplicationsDetectorT num_replications_detector_type;
-	public: typedef RealT real_type;
-	public: typedef UIntT size_type;
+	private: typedef engine<RealT> self_type;
+	public: typedef typename base_type::real_type real_type;
 	public: typedef typename base_type::event_type event_type;
 	public: typedef typename base_type::engine_context_type engine_context_type;
 	public: typedef typename base_type::event_source_type event_source_type;
 	public: typedef ::dcs::des::independent_replications_analysis_category output_analysis_category;
-	private: typedef ::boost::shared_ptr<event_source_type> event_source_pointer;
-	private: typedef typename base_type::statistic_type statistic_type;
-	private: typedef typename base_type::analyzable_statistic_pointer analyzable_statistic_pointer;
 
 
-	//public: static const size_type default_min_repl_size = 1000;
-	public: static const real_type default_min_repl_duration; // = 1000;
-	public: static const size_type default_min_num_replications = 5;
+	//public: static const std::size_t default_min_repl_size = 1000;
+	public: static const RealT default_min_repl_duration; // = 1000;
+	public: static const std::size_t default_min_num_replications = 5;
 
 
 	// The default constructor
-	public: explicit engine(real_type min_repl_duration=default_min_repl_duration, size_type min_num_repl=default_min_num_replications)
+	public: explicit engine(RealT min_repl_duration=default_min_repl_duration, std::size_t min_num_repl=default_min_num_replications)
 		: base_type(),
 		  min_repl_duration_(min_repl_duration),
 		  min_num_repl_(min_num_repl),
@@ -134,25 +127,25 @@ class engine: public ::dcs::des::engine<RealT>
 //	}
 
 
-	public: void min_replication_duration(real_type time)
+	public: void min_replication_duration(RealT time)
 	{
 		min_repl_duration_ = time;
 	}
 
 
-	public: real_type min_replication_duration() const
+	public: RealT min_replication_duration() const
 	{
 		return min_repl_duration_;
 	}
 
 
-	public: void min_num_replications(size_type n)
+	public: void min_num_replications(std::size_t n)
 	{
 		min_num_repl_ = n;
 	}
 
 
-	public: size_type min_num_replications() const
+	public: std::size_t min_num_replications() const
 	{
 		return min_num_repl_;
 	}
@@ -210,7 +203,7 @@ class engine: public ::dcs::des::engine<RealT>
 //	}
 
 
-	public: size_type num_replications() const
+	public: std::size_t num_replications() const
 	{
 		return repl_count_;
 	}
@@ -226,7 +219,7 @@ class engine: public ::dcs::des::engine<RealT>
 
 	protected: void monitor_statistics_in_replication()
 	{
-		typedef typename base_type::analyzable_statistic_const_iterator stat_iterator;
+		typedef typename std::map<base_analyzable_statistic<real_type>*,bool>::const_iterator stat_iterator;
 
 		DCS_DEBUG_TRACE_L(1, "(" << this << ") BEGIN Monitoring statistics in replication."); //XXX
 
@@ -239,13 +232,13 @@ class engine: public ::dcs::des::engine<RealT>
 		//       are "complete".
 
 		bool replication_done(true);
-		stat_iterator end_it(this->monitored_statistics().end());
+		const stat_iterator end_it = this->monitored_statistics().end();
 		for (
 			stat_iterator it = this->monitored_statistics().begin();
 			it != end_it;
 			++it
 		) {
-			analyzable_statistic_pointer ptr_stat(it->first);
+			boost::shared_ptr< base_analyzable_statistic<real_type> > ptr_stat(it->first);
 
 			ptr_stat->refresh();
 
@@ -456,12 +449,12 @@ class engine: public ::dcs::des::engine<RealT>
 	}
 
 
-	private: analyzable_statistic_pointer do_make_analyzable_statistic(statistic_type const& stat)
+	private: boost::shared_ptr< base_analyzable_statistic<real_type> > do_make_analyzable_statistic(any_statistic<real_type> const& stat)
 	{
-		typedef ::dcs::des::null_transient_detector<real_type,size_type> transient_detector_type;
-		typedef dummy_replication_size_detector<real_type,size_type> replication_size_detector_type;
-		typedef dummy_num_replications_detector<real_type,size_type> num_replications_detector_type;
-		typedef analyzable_statistic<statistic_type,
+		typedef ::dcs::des::null_transient_detector<RealT> transient_detector_type;
+		typedef dummy_replication_size_detector<RealT> replication_size_detector_type;
+		typedef dummy_num_replications_detector<RealT> num_replications_detector_type;
+		typedef analyzable_statistic<any_statistic<real_type>,
 									 transient_detector_type,
 									 replication_size_detector_type,
 									 num_replications_detector_type> analyzable_statistic_impl_type;
@@ -473,8 +466,8 @@ class engine: public ::dcs::des::engine<RealT>
 //					replication_size_detector_type(),
 //					num_replications_detector_type(),
 //					*this,
-//					::dcs::math::constants::infinity<real_type>::value,
-//					::dcs::math::constants::infinity<size_type>::value
+//					::dcs::math::constants::infinity<RealT>::value,
+//					::dcs::math::constants::infinity<std::size_t>::value
 //			);
 		return ::boost::shared_ptr<analyzable_statistic_impl_type>(
 				new analyzable_statistic_impl_type(
@@ -483,8 +476,8 @@ class engine: public ::dcs::des::engine<RealT>
 					replication_size_detector_type(),
 					num_replications_detector_type(),
 					*this,
-					::dcs::math::constants::infinity<real_type>::value,
-					::dcs::math::constants::infinity<size_type>::value
+					::dcs::math::constants::infinity<RealT>::value,
+					::dcs::math::constants::infinity<std::size_t>::value
 				)
 			);
 	}
@@ -521,15 +514,15 @@ class engine: public ::dcs::des::engine<RealT>
 		{
 			// Initialize statistics for the new experiment
 
-			typedef typename base_type::analyzable_statistic_iterator stat_iterator;
+			typedef typename std::map<base_analyzable_statistic<real_type>*,bool>::iterator stat_iterator;
 
-			stat_iterator end_it(this->monitored_statistics().end());
+			const stat_iterator end_it = this->monitored_statistics().end();
 			for (
 				stat_iterator it = this->monitored_statistics().begin();
 				it != end_it;
 				++it
 			) {
-				analyzable_statistic_pointer ptr_stat(it->first);
+				boost::shared_ptr< base_analyzable_statistic<real_type> > ptr_stat(it->first);
 
 				ptr_stat->initialize_for_experiment();
 			}
@@ -571,15 +564,15 @@ class engine: public ::dcs::des::engine<RealT>
 		{
 			// Finalize statistics for the current experiment
 
-			typedef typename base_type::analyzable_statistic_iterator stat_iterator;
+			typedef typename std::map<base_analyzable_statistic<real_type>*,bool>::const_iterator stat_iterator;
 
-			stat_iterator end_it(this->monitored_statistics().end());
+			const stat_iterator end_it = this->monitored_statistics().end();
 			for (
 				stat_iterator it = this->monitored_statistics().begin();
 				it != end_it;
 				++it
 			) {
-				analyzable_statistic_pointer ptr_stat(it->first);
+				boost::shared_ptr< base_analyzable_statistic<real_type> > ptr_stat(it->first);
 
 				ptr_stat->finalize_for_experiment();
 			}
@@ -594,28 +587,20 @@ class engine: public ::dcs::des::engine<RealT>
 	}
 
 
-	/// The minimum length of each replication.
-	private: real_type min_repl_duration_;
-	/// The minimum number of replication to be performed.
-	private: size_type min_num_repl_;
+	private: RealT min_repl_duration_; ///< The minimum length of each replication.
+	private: std::size_t min_num_repl_; ///< The minimum number of replication to be performed.
 	//private: bool end_of_sim_;
-	/// Boolean flag for indicating the end of the current replication.
-	private: bool end_of_repl_;
-	/// The Begin-of-Replication event source.
-	private: event_source_pointer ptr_bor_evt_src_;
-	/// The Maybe-End-of-Replication event source.
-	private: event_source_pointer ptr_meor_evt_src_;
-	/// The End-of-Replication event source.
-	private: event_source_pointer ptr_eor_evt_src_;
-	/// The number of performed replications.
-	private: size_type repl_count_;
-//	//// Accumulated value of simulated time.
-//	private: real_type acc_sim_time_;
+	private: bool end_of_repl_; ///< Boolean flag for indicating the end of the current replication.
+	private: boost::shared_ptr< event_source<RealT> > ptr_bor_evt_src_; ///< The Begin-of-Replication event source.
+	private: boost::shared_ptr< event_source<RealT> > ptr_meor_evt_src_; ///< The Maybe-End-of-Replication event source.
+	private: boost::shared_ptr< event_source<RealT> > ptr_eor_evt_src_; ///< The End-of-Replication event source.
+	private: std::size_t repl_count_; ///< The number of performed replications.
+//	private: RealT acc_sim_time_; ////< Accumulated value of simulated time.
 }; // engine
 
 
-template <typename RealT, typename UIntT>
-const RealT engine<RealT,UIntT>::default_min_repl_duration = RealT(1);
+template <typename RealT>
+const RealT engine<RealT>::default_min_repl_duration = 1;
 
 
 namespace /*<unnamed>*/ { namespace detail {
@@ -644,7 +629,6 @@ struct output_analyzer
 template <
 	typename StatisticT,
 //	typename RealT,
-//	typename UIntT,
 	typename TransientPhaseDetectorT,
 	typename ReplicationSizeDetectorT,
 	typename NumReplicationsDetectorT
@@ -656,7 +640,7 @@ struct make_analyzable_statistic_type<
 				ReplicationSizeDetectorT,
 				NumReplicationsDetectorT
 			>//,
-//			replications::engine<RealT,UIntT>
+//			replications::engine<RealT>
 	>
 {
 	typedef replications::analyzable_statistic<
@@ -675,7 +659,6 @@ struct make_analyzable_statistic_type<
 template <
 	typename StatisticT,
 	typename RealT,
-	typename UIntT,
 	typename TransientPhaseDetectorT,
 	typename ReplicationSizeDetectorT,
 	typename NumReplicationsDetectorT
@@ -690,16 +673,15 @@ template <
 		>//,
 //		replications::engine<
 //			RealT,
-//			UIntT
 //		>
 	>::type
 > make_analyzable_statistic(StatisticT const& stat,
 							TransientPhaseDetectorT const& transient_detector,
 							ReplicationSizeDetectorT const& repl_size_detector,
 							NumReplicationsDetectorT const& num_repl_detector,
-							replications::engine<RealT,UIntT>& des_engine,
+							replications::engine<RealT>& des_engine,
 							RealT relative_precision,
-							UIntT max_obs)
+							std::size_t max_obs)
 {
 	typedef typename make_analyzable_statistic_type<
 						StatisticT,
@@ -708,14 +690,8 @@ template <
 							ReplicationSizeDetectorT,
 							NumReplicationsDetectorT
 						>//,
-//						replications::engine<
-//							RealT,
-//							UIntT
-//						>
+//						replications::engine<RealT>
 					>::type statistic_type;
-	typedef TransientPhaseDetectorT transient_phase_detector_type;
-	typedef ReplicationSizeDetectorT replication_size_detector_type;
-	typedef NumReplicationsDetectorT num_replications_detector_type;
 
 	::boost::shared_ptr<statistic_type> ptr_stat(
 			new statistic_type(

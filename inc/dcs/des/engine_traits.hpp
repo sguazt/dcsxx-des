@@ -28,6 +28,7 @@
 #ifndef DCS_DES_ENGINE_TRAITS_HPP
 #define DCS_DES_ENGINE_TRAITS_HPP
 
+
 namespace dcs { namespace des {
 
 /**
@@ -39,9 +40,10 @@ template <typename EngineT>
 struct engine_traits
 {
 	typedef EngineT engine_type;
-	typedef typename engine_type::event_type event_type;
-	typedef typename engine_type::engine_context_type engine_context_type;
-	typedef typename engine_type::event_source_type event_source_type;
+	typedef typename EngineT::real_type real_type;
+	typedef typename EngineT::event_type event_type;
+	typedef typename EngineT::engine_context_type engine_context_type;
+	typedef typename EngineT::event_source_type event_source_type;
 };
 
 }} // Namespace dcs::des

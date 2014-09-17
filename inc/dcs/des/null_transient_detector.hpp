@@ -36,16 +36,15 @@
 
 namespace dcs { namespace des {
 
-template <typename RealT, typename UIntT = std::size_t>
+template <typename RealT>
 class null_transient_detector
 {
 	public: typedef RealT real_type;
-	public: typedef UIntT uint_type;
 	public: typedef ::std::pair<real_type,real_type> sample_type;
 	public: typedef ::std::vector<sample_type> sample_container;
 
 
-	private: static const uint_type transient_size_ = 0;
+	private: static const std::size_t transient_size_ = 0;
 
 
 	public: null_transient_detector()
@@ -74,7 +73,7 @@ class null_transient_detector
 	}
 
 
-	public: uint_type estimated_size() const
+	public: std::size_t estimated_size() const
 	{
 		return transient_size_;
 	}

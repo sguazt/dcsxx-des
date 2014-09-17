@@ -50,13 +50,12 @@ namespace dcs { namespace des { namespace model { namespace qn {
 
 namespace detail { namespace /*<unnamed>*/ {
 
-template <typename RealT, typename UIntT>
+template <typename RealT>
 struct quantum_expiry_event_state
 {
 	typedef RealT real_type;
-	typedef UIntT uint_type;
 
-	uint_type sid; ///< The server ID where the QUANTUM-EXPIRY event happens.
+	std::size_t sid; ///< The server ID where the QUANTUM-EXPIRY event happens.
 	real_type work; ///< The amount of work (independent by the share) done during the time the quantum is owned (generally is the same as the quantum length).
 	bool early_expiry; ///< Flag to indicate either or not the expiration of the quantum is premature.
 	real_type update_time;
@@ -78,7 +77,6 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 	private: typedef rr_service_strategy<TraitsT> self_type;
 	public: typedef TraitsT traits_type;
 	public: typedef typename base_type::real_type real_type;
-	public: typedef typename base_type::uint_type uint_type;
 	private: typedef typename base_type::customer_type customer_type;
 	public: typedef typename base_type::customer_pointer customer_pointer;
 	public: typedef ::dcs::math::stats::any_distribution<real_type> distribution_type;
@@ -95,8 +93,8 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 	private: typedef typename engine_traits<engine_type>::engine_context_type engine_context_type;
 	private: typedef ::boost::shared_ptr<event_source_type> event_source_pointer;
 	private: typedef ::boost::shared_ptr<event_type> event_pointer;
-	private: typedef detail::quantum_expiry_event_state<real_type,uint_type> quantum_expiry_event_state_type;
-	private: typedef ::std::map<uint_type,event_pointer> server_event_map;
+	private: typedef detail::quantum_expiry_event_state<real_type> quantum_expiry_event_state_type;
+	private: typedef ::std::map<std::size_t,event_pointer> server_event_map;
 
 
 	public: explicit rr_service_strategy(real_type quantum=1.0e-5)
@@ -245,7 +243,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		server_event_iterator end_it(srv_evt_map_.end());
 		for (server_event_iterator it = srv_evt_map_.begin(); it != end_it; ++it)
 		{
-			const uint_type sid(it->first);
+			const std::size_t sid(it->first);
 			event_pointer ptr_evt(it->second);
 
 			// check: pointer to event must be a valid pointer
@@ -312,7 +310,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 				//DCS_DEBUG_ASSERT( ::dcs::math::float_traits<real_type>::definitely_greater_equal(new_fire_time, state.max_fire_time) );
 				DCS_DEBUG_ASSERT( ::dcs::math::float_traits<real_type>::definitely_greater_equal(state.max_fire_time, new_fire_time) );
 
-//if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
+//if (dynamic_cast< ::dcs::des::replications::engine<real_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
 //{//XXX
 //::std::cerr << "(" << this << ") Node: " << this->node() << " -- Reschedling QUANTUM-EXPIRTY -> Current Share: " << this->share() << " - old residual: " << old_residual << " - new residual: " << new_residual << " - old work: " << state.work << " - new work: " << ((state.work-old_residual)+new_residual) << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
 //}//XXX
@@ -406,7 +404,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 //			//   a = service_demand/(share*(quantum*queue_length+1))
 //
 //			//rt_info.share(::std::min(share,svc_time/(quantum()*(servers_[next_srv_].size()+1))));
-//			uint_type nc(servers_[next_srv_].size()+1);
+//			std::size_t nc(servers_[next_srv_].size()+1);
 //			rt_info.share(rt_info.service_demand()/(share*(quantum()*nc+1)));
 //		}
 
@@ -417,7 +415,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		rt_info.share(0); //EXPERIMENTAL
 
 		DCS_DEBUG_TRACE_L(3, "(" << this << ") Generated service for customer: " << *ptr_customer << " - Service demand: " << rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - Share: " << share << " - Runtime: " << rt_info.runtime() << " - Server: " << next_srv_ << " (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
-//if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
+//if (dynamic_cast< ::dcs::des::replications::engine<real_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
 //{//XXX
 //::std::cerr << "(" << this << ") Node: " << this->node() << " -- Generated service for customer: " << *ptr_customer << " - Service demand: " << rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - Share: " << share << " - Runtime: " << rt_info.runtime() << " - Server: " << next_srv_ << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
 //}//XXX
@@ -430,7 +428,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 	private: void do_remove(customer_pointer const& ptr_customer)
 	{
 		DCS_DEBUG_TRACE_L(3, "(" << this << ") BEGIN Do-Remove of Customer: " << *ptr_customer << " (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
-//if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
+//if (dynamic_cast< ::dcs::des::replications::engine<real_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
 //{//XXX
 //::std::cerr << "(" << this << ") Node: " << this->node() << " -- BEGIN Do-Remove of Customer: " << *ptr_customer << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
 //}//XXX
@@ -445,7 +443,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		customer_identifier_type cid(ptr_customer->id());
 
 		// Retrieve the server assigned to this customer
-		uint_type sid(this->info(cid).server_id());
+		std::size_t sid(this->info(cid).server_id());
 
 //		// check: the customer removed is the customer currently in execution
 //		DCS_DEBUG_ASSERT( cid == servers_[sid].front() );
@@ -459,7 +457,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 
 		next_srv_ = next_server(sid);
 
-//if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
+//if (dynamic_cast< ::dcs::des::replications::engine<real_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
 //{//XXX
 //::std::cerr << "(" << this << ") Node: " << this->node() << " -- END Do-Remove of Customer: " << *ptr_customer << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
 //}//XXX
@@ -471,7 +469,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		servers_.clear();
 		servers_.resize(ns_);
 		num_busy_ = next_srv_
-				  = uint_type/*zero*/();
+				  = std::size_t/*zero*/();
 		srv_evt_map_.clear(); //FIXME: should we really do this?
 	}
 
@@ -480,18 +478,18 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		servers_.clear();
 		servers_.resize(ns_);
 		num_busy_ = next_srv_
-				  = uint_type/*zero*/();
+				  = std::size_t/*zero*/();
 		srv_evt_map_.clear();
 		old_share_ = this->share();
 		old_multiplier_ = this->capacity_multiplier();
 	}
 
-	private: uint_type do_num_servers() const
+	private: std::size_t do_num_servers() const
 	{
 		return ns_;
 	}
 
-	private: uint_type do_num_busy_servers() const
+	private: std::size_t do_num_busy_servers() const
 	{
 		return num_busy_;
 	}
@@ -508,17 +506,17 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 			);
 	}
 
-	private: uint_type next_server(uint_type start_sid) const
+	private: std::size_t next_server(std::size_t start_sid) const
 	{
-		uint_type best_sid(start_sid);
+		std::size_t best_sid(start_sid);
 
 		if (ns_ > 1 && servers_[start_sid].size() > 0)
 		{
 			// choose the server with the smallest number of served customers
-			uint_type best_sid_size(servers_[best_sid].size());
-			for (uint_type i = 1; i < ns_ && best_sid_size > 0; ++i)
+			std::size_t best_sid_size(servers_[best_sid].size());
+			for (std::size_t i = 1; i < ns_ && best_sid_size > 0; ++i)
 			{
-				uint_type sid((start_sid+i) % ns_);
+				std::size_t sid((start_sid+i) % ns_);
 				if (servers_[sid].size() < servers_[best_sid].size())
 				{
 					best_sid = sid;
@@ -549,7 +547,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 
 		DCS_DEBUG_TRACE_L(3, "Node: " << this->node() << " -- Scheduled next QUANTUM-EXPIRY: " << *ptr_evt << " at " << (this->node().network().engine().simulated_time()+delay) << " (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
 
-//if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
+//if (dynamic_cast< ::dcs::des::replications::engine<real_type,std::size_t> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
 //{//XXX
 //::std::cerr << "Node: " << this->node() << " -- Scheduled next QUANTUM-EXPIRY: " << *ptr_evt << " at " << (this->node().network().engine().simulated_time()+delay) << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
 //}//XXX
@@ -570,12 +568,12 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		DCS_DEBUG_ASSERT( servers_[state.sid].size() > 0 );
 
 		real_type cur_time(this->node().network().engine().simulated_time());
-		uint_type sid(state.sid);
+		std::size_t sid(state.sid);
 		customer_identifier_type cid(servers_[sid].front());
 		servers_[sid].pop_front();
 
 		DCS_DEBUG_TRACE_L(3, "Current Customer ID: " << cid);//XXX
-//if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
+//if (dynamic_cast< ::dcs::des::replications::engine<real_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
 //{//XXX
 //::std::cerr << "Node: " << this->node() << " -- Current Customer ID: " << cid << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
 //}//XXX
@@ -583,7 +581,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		runtime_info_type& rt_info(this->info(cid));
 
 		DCS_DEBUG_TRACE_L(3, "Updating Customer: " << rt_info.get_customer() << " - Service demand: " << rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - Quantum: " << this->quantum() << " - State.Work: " << state.work << " - old share: " << rt_info.share() << " - runtime: " << rt_info.runtime() << " - old completed work: " << rt_info.completed_work() << " - old residual-work: " << rt_info.residual_work() << " (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
-//if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
+//if (dynamic_cast< ::dcs::des::replications::engine<real_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
 //{//XXX
 //::std::cerr << "Node: " << this->node() << " -- Updating Customer: " << rt_info.get_customer() << " - Service demand: " << rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - Quantum: " << this->quantum() << " - State.Work: " << state.work << " - old share: " << rt_info.share() << " - runtime: " << rt_info.runtime() << " - old completed work: " << rt_info.completed_work() << " - old residual-work: " << rt_info.residual_work() << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
 //}//XXX
@@ -604,7 +602,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		} // else this customer is done
 
 		DCS_DEBUG_TRACE_L(3, "Updated Customer: " << rt_info.get_customer() << " - Service demand: " << rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - Quantum: " << this->quantum() << " - new share: " << rt_info.share() << " - new runtime: " << rt_info.runtime() << " - new completed work: " << rt_info.completed_work() << " - new residual-work: " << rt_info.residual_work() << " (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
-//if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
+//if (dynamic_cast< ::dcs::des::replications::engine<real_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
 //{//XXX
 //::std::cerr <<  "Node: " << this->node() << " -- Updated Customer: " << rt_info.get_customer() << " - Service demand: " << rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - Quantum: " << this->quantum() << " - new share: " << rt_info.share() << " - new runtime: " << rt_info.runtime() << " - new completed work: " << rt_info.completed_work() << " - new residual-work: " << rt_info.residual_work() << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
 //}//XXX
@@ -616,7 +614,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 			customer_identifier_type next_cid = servers_[sid].front();
 
 			DCS_DEBUG_TRACE_L(3, "Next Customer ID: " << next_cid << " (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
-//if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
+//if (dynamic_cast< ::dcs::des::replications::engine<real_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
 //{//XXX
 //::std::cerr << "Node: " << this->node() << " -- Next Customer ID: " << next_cid << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
 //}//XXX
@@ -646,7 +644,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 			state.update_time = cur_time;
 
 			DCS_DEBUG_TRACE_L(3, "Next Customer: " << next_rt_info.get_customer() << " - Service demand: " << next_rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - Quantum: " << this->quantum() << " - share: " << next_rt_info.share() << " - runtime: " << next_rt_info.runtime() << " - completed work: " << next_rt_info.completed_work() << " - residual-work: " << next_rt_info.residual_work() << " (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
-//if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
+//if (dynamic_cast< ::dcs::des::replications::engine<real_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
 //{//XXX
 //::std::cerr << "Node: " << this->node() << " -- Next Customer: " << next_rt_info.get_customer() << " - Service demand: " << next_rt_info.service_demand() << " - Multiplier: " << this->capacity_multiplier() << " - Quantum: " << this->quantum() << " - share: " << next_rt_info.share() << " - runtime: " << next_rt_info.runtime() << " - completed work: " << next_rt_info.completed_work() << " - residual-work: " << next_rt_info.residual_work() << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
 //::std::cerr << "Node: " << this->node() << " -- Scheduling next QUANTUM-EXPIRY for Customer ID: " << cid << " at " << (this->node().network().engine().simulated_time()+state.work) << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
@@ -659,7 +657,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 			srv_evt_map_.erase(sid);
 		}
 
-////if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
+////if (dynamic_cast< ::dcs::des::replications::engine<real_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
 ////{//XXX
 ////::std::cerr << "Node: " << this->node() << " -- Rescheduling End-of-Service of Customer ID: " << cid << " at " << (this->node().network().engine().simulated_time()+delay) << " (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
 ////}//XXX
@@ -667,7 +665,7 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 		if (::dcs::math::float_traits<real_type>::approximately_equal(residual_work, static_cast<real_type>(0)))
 		{
 			DCS_DEBUG_TRACE_L(3, "Node: " << this->node() << " -- Rescheduling End-of-Service of Customer ID: " << cid << " NOW (Clock: " << this->node().network().engine().simulated_time() << ")");//XXX
-//if (dynamic_cast< ::dcs::des::replications::engine<real_type,uint_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
+//if (dynamic_cast< ::dcs::des::replications::engine<real_type> const&>(this->node().network().engine()).num_replications() == 2 && this->node().network().engine().simulated_time()>28900)//XXX
 //{//XXX
 //::std::cerr << "Node: " << this->node() << " -- Rescheduling End-of-Service of Customer ID: " << cid << " NOW (Clock: " << this->node().network().engine().simulated_time() << ")" << ::std::endl;//XXX
 //}//XXX
@@ -681,15 +679,15 @@ class rr_service_strategy: public base_service_strategy<TraitsT>
 	/// The quantum
 	private: real_type q_;
 	/// The total number of servers.
-	private: uint_type ns_;
+	private: std::size_t ns_;
 	/// The servers container. For each server, it maintains the list of customers currently running on it.
 	private: server_container servers_;
 	/// The service distributions container.
 	private: distribution_container distrs_;
 	/// The number of current busy severs.
-	private: uint_type num_busy_;
+	private: std::size_t num_busy_;
 	/// The next server used to assign a new customer.
-	private: uint_type next_srv_;
+	private: std::size_t next_srv_;
 	/// Source for QUANTUM-EXCEEDED events.
 	private: event_source_pointer ptr_quantum_expiry_evt_src_;
 	/// Hold <server-id,quantum-event-pointer> associations

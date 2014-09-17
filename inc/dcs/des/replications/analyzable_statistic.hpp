@@ -51,7 +51,7 @@
 
 namespace dcs { namespace des { namespace replications {
 
-template <typename RealT, typename UIntT>
+template <typename RealT>
 class engine;
 
 
@@ -72,34 +72,30 @@ template <
 	typename ReplicationSizeDetectorT,
 	typename NumReplicationsDetectorT
 >
-class analyzable_statistic: public base_analyzable_statistic<
-										typename StatisticT::value_type,
-										typename StatisticT::uint_type
-									>
+class analyzable_statistic: public base_analyzable_statistic<typename StatisticT::value_type>
 {
 	private: typedef analyzable_statistic<StatisticT,TransientDetectorT,ReplicationSizeDetectorT,NumReplicationsDetectorT> self_type;
 	public: typedef StatisticT statistic_type;
 	public: typedef typename statistic_type::value_type value_type;
-	public: typedef typename statistic_type::uint_type uint_type;
 	public: typedef TransientDetectorT transient_phase_detector_type;
 	public: typedef ReplicationSizeDetectorT replication_size_detector_type;
 	public: typedef NumReplicationsDetectorT num_replications_detector_type;
 //	public: typedef typename statistic_type::category_type category_type;
-	private: typedef base_analyzable_statistic<value_type,uint_type> base_type;
-	private: typedef ::dcs::des::replications::engine<value_type,uint_type> engine_type;
+	private: typedef base_analyzable_statistic<value_type> base_type;
+	private: typedef ::dcs::des::replications::engine<value_type> engine_type;
 	private: typedef typename ::dcs::des::engine_traits<engine_type>::event_type event_type;
 	private: typedef typename ::dcs::des::engine_traits<engine_type>::engine_context_type engine_context_type;
 
 
 //	public: static const value_type default_confidence_level; ///< Default value for the confidence level
-	public: static const uint_type default_min_num_repl = 2; ///< Default value for the minimum number of replications
-	public: static const uint_type default_max_num_obs; ///< Default value for the maximum number of observations
+	public: static const std::size_t default_min_num_repl = 2; ///< Default value for the minimum number of replications
+	public: static const std::size_t default_max_num_obs; ///< Default value for the maximum number of observations
 
 
 	/// A constructor.
 	public: explicit analyzable_statistic(value_type relative_precision = base_type::default_target_relative_precision,
-										  uint_type max_num_obs = default_max_num_obs,
-										  uint_type min_num_repl = default_min_num_repl)
+										  std::size_t max_num_obs = default_max_num_obs,
+										  std::size_t min_num_repl = default_min_num_repl)
 		: base_type(relative_precision),
 		  stat_(),
 		  trans_detector_(),
@@ -134,15 +130,14 @@ class analyzable_statistic: public base_analyzable_statistic<
 	 * \param min_num_replications The minimum number of replications to collect before
 	 *  checking for relative precision.
 	 */
-	public: template <typename RealT, typename UIntT>
-		analyzable_statistic(statistic_type const& stat,
-							 transient_phase_detector_type const& transient_detector,
-							 replication_size_detector_type const& repl_size_detector,
-							 num_replications_detector_type const& num_repl_detector,
-							 ::dcs::des::replications::engine<RealT,UIntT>& eng,
-							 value_type relative_precision = base_type::default_target_relative_precision,
-							 uint_type max_num_obs = default_max_num_obs,
-							 uint_type min_num_repl = default_min_num_repl)
+	public: analyzable_statistic(statistic_type const& stat,
+								 transient_phase_detector_type const& transient_detector,
+								 replication_size_detector_type const& repl_size_detector,
+								 num_replications_detector_type const& num_repl_detector,
+								 ::dcs::des::replications::engine<value_type>& eng,
+								 value_type relative_precision = base_type::default_target_relative_precision,
+								 std::size_t max_num_obs = default_max_num_obs,
+								 std::size_t min_num_repl = default_min_num_repl)
 		: base_type(relative_precision),
 		  stat_(stat),
 		  trans_detector_(transient_detector),
@@ -169,19 +164,19 @@ class analyzable_statistic: public base_analyzable_statistic<
 	}
 
 	/// Returns the current number of performed replications
-	public: uint_type actual_num_replications() const
+	public: std::size_t actual_num_replications() const
 	{
 		return repl_mean_stat_.num_observations();
 	}
 
 	/// Returns the size of current replication
-	public: uint_type actual_replication_size() const
+	public: std::size_t actual_replication_size() const
 	{
 		return stat_.num_observations();
 	}
 
 	/// Returns the target number of replications to perform
-	public: uint_type num_replications() const
+	public: std::size_t num_replications() const
 	{
 		return num_repl_;
 	}
@@ -194,7 +189,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 	}
 
 	/// Returns the target size of each replication
-	public: uint_type replication_size() const
+	public: std::size_t replication_size() const
 	{
 		return repl_size_;
 	}
@@ -580,7 +575,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 	}
 
 
-	private: uint_type do_max_num_observations() const
+	private: std::size_t do_max_num_observations() const
 	{
 		return max_num_obs_;
 	}
@@ -592,7 +587,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 	}
 
 
-	private: uint_type do_num_observations() const
+	private: std::size_t do_num_observations() const
 	{
 		return repl_mean_stat_.num_observations();
 	}
@@ -660,7 +655,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 	}
 
 
-	private: uint_type do_transient_phase_length() const
+	private: std::size_t do_transient_phase_length() const
 	{
 		return trans_len_;
 	}
@@ -716,19 +711,19 @@ class analyzable_statistic: public base_analyzable_statistic<
 	private: replication_size_detector_type repl_size_detector_;
 	private: num_replications_detector_type num_repl_detector_;
 	/// The target relative precision
-	private: /*const*/ uint_type min_num_repl_;
-	private: /*const*/ uint_type max_num_obs_;
+	private: /*const*/ std::size_t min_num_repl_;
+	private: /*const*/ std::size_t max_num_obs_;
 //	/// The reached relative precision
 //	private: value_type rel_prec_;
 	private: bool trans_detected_;
-	private: uint_type trans_len_;
+	private: std::size_t trans_len_;
 	private: bool repl_size_detected_;
-	private: uint_type repl_size_;
+	private: std::size_t repl_size_;
 	private: bool num_repl_detected_;
-	private: uint_type num_repl_;
+	private: std::size_t num_repl_;
 	/// If \c true, the statistic is not updated anymore.
 //	private: value_type repl_mean_;
-	private: mean_estimator<value_type,uint_type> repl_mean_stat_;
+	private: mean_estimator<value_type> repl_mean_stat_;
 	private: value_type steady_start_time_;
 
 	//@} Data members
@@ -741,7 +736,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 //	typename ReplicationSizeDetectorT,
 //	typename NumReplicationsDetectorT
 //>
-//const typename StatisticT::value_type analyzable_statistic<StatisticT,TransientDetectorT,ReplicationSizeDetectorT,NumReplicationsDetectorT>::default_confidence_level = base_statistic<typename StatisticT::value_type, typename StatisticT::uint_type>::default_confidence_level;
+//const typename StatisticT::value_type analyzable_statistic<StatisticT,TransientDetectorT,ReplicationSizeDetectorT,NumReplicationsDetectorT>::default_confidence_level = base_statistic<typename StatisticT::value_type>::default_confidence_level;
 
 template <
 	typename StatisticT,
@@ -749,7 +744,7 @@ template <
 	typename ReplicationSizeDetectorT,
 	typename NumReplicationsDetectorT
 >
-const typename StatisticT::uint_type analyzable_statistic<StatisticT,TransientDetectorT,ReplicationSizeDetectorT,NumReplicationsDetectorT>::default_max_num_obs = base_analyzable_statistic<typename StatisticT::value_type,typename StatisticT::uint_type>::num_observations_infinity;
+const std::size_t analyzable_statistic<StatisticT,TransientDetectorT,ReplicationSizeDetectorT,NumReplicationsDetectorT>::default_max_num_obs = base_analyzable_statistic<typename StatisticT::value_type>::num_observations_infinity;
 
 }}} // Namespace dcs::des::replications
 

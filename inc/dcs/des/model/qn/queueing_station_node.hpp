@@ -49,7 +49,6 @@ class queueing_station_node: public service_station_node<TraitsT>
 	private: typedef queueing_station_node<TraitsT> self_type;
 	public: typedef TraitsT traits_type;
 	public: typedef typename base_type::real_type real_type;
-	public: typedef typename base_type::uint_type uint_type;
 	public: typedef typename base_type::identifier_type identifier_type;
 	public: typedef typename base_type::customer_pointer customer_pointer;
 	public: typedef typename base_type::service_strategy_pointer service_strategy_pointer;
@@ -214,7 +213,7 @@ class queueing_station_node: public service_station_node<TraitsT>
 //	{
 //		base_type::do_reset();
 //
-//		ndis_ = uint_type/*zero*/();
+//		ndis_ = std::size_t/*zero*/();
 //		ptr_queue_->reset();
 //	}
 
@@ -229,7 +228,7 @@ class queueing_station_node: public service_station_node<TraitsT>
 	{
 		base_type::do_initialize_experiment();
 
-		ndis_ = uint_type/*zero*/();
+		ndis_ = std::size_t/*zero*/();
 		ptr_queue_->reset();
 	}
 
@@ -509,7 +508,7 @@ class queueing_station_node: public service_station_node<TraitsT>
 	/// The queueing strategy.
 	private: queueing_strategy_pointer ptr_queue_;
 	/// The number of discarded customers in current experiment.
-	private: uint_type ndis_;
+	private: std::size_t ndis_;
 	/// The source of DISCARD-CUSTOMER events.
 	private: event_source_pointer ptr_dis_evt_src_;
 

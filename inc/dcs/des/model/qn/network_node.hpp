@@ -59,7 +59,6 @@ class network_node: public ::dcs::des::entity
 	private: typedef network_node<TraitsT> self_type;
 	public: typedef TraitsT traits_type;
 	public: typedef typename traits_type::real_type real_type;
-	public: typedef typename traits_type::uint_type uint_type;
 	private: typedef typename traits_type::customer_type customer_type;
 	public: typedef ::boost::shared_ptr<customer_type> customer_pointer;
 	public: typedef typename traits_type::network_type network_type;
@@ -70,7 +69,7 @@ class network_node: public ::dcs::des::entity
 	protected: typedef typename engine_traits<engine_type>::engine_context_type engine_context_type;
 	public: typedef typename engine_traits<engine_type>::event_source_type event_source_type;
 	public: typedef ::boost::shared_ptr<event_source_type> event_source_pointer;
-	public: typedef base_statistic<real_type,uint_type> output_statistic_type;
+	public: typedef base_statistic<real_type> output_statistic_type;
 	public: typedef ::boost::shared_ptr<output_statistic_type> output_statistic_pointer;
 	private: typedef ::std::vector<output_statistic_pointer> output_statistic_container;
 	private: typedef ::std::map<node_output_statistic_category,output_statistic_container> output_statistic_category_container;
@@ -295,13 +294,13 @@ class network_node: public ::dcs::des::entity
 	}
 
 
-	public: uint_type num_arrivals() const
+	public: std::size_t num_arrivals() const
 	{
 		return narr_;
 	}
 
 
-	public: uint_type num_departures() const
+	public: std::size_t num_departures() const
 	{
 		return ndep_;
 	}
@@ -324,7 +323,7 @@ class network_node: public ::dcs::des::entity
 //		// Reset statistics
 //
 //		narr_ = ndep_
-//			  = uint_type/*zero*/();
+//			  = std::size_t/*zero*/();
 ////		typename output_statistic_category_container::const_iterator stat_end_it = stats_.end();
 ////		for (typename output_statistic_category_container::const_iterator it = stats_.begin();
 ////			 it != stat_end_it;
@@ -384,7 +383,7 @@ class network_node: public ::dcs::des::entity
 	{
 		// Reset experiment-level statistics
 		narr_ = ndep_
-			  = uint_type/*zero*/();
+			  = std::size_t/*zero*/();
 
 		last_evt_time_ = real_type/*zero*/();
 
@@ -666,8 +665,6 @@ class network_node: public ::dcs::des::entity
 	/// Check if the given statistic category is valid.
 	private: bool check_stat(node_output_statistic_category category) const
 	{
-		typedef typename output_statistic_category_container::size_type size_type;
-
 		return stats_.count(category) > 0
 			&& !stats_.at(category).empty();
 	}
@@ -818,11 +815,11 @@ class network_node: public ::dcs::des::entity
 //	private: event_source_pointer ptr_dis_evt_src_;
 	private: network_pointer ptr_net_;
 	/// The number of arrived customers to this node.
-	private: uint_type narr_;
+	private: std::size_t narr_;
 	/// The number of (successfully) departed customers from this node.
-	private: uint_type ndep_;
+	private: std::size_t ndep_;
 //	/// The number of discarded customers from this node.
-//	private: uint_type ndis_;
+//	private: std::size_t ndis_;
 	/// Output statistics grouped by their category.
 	private: output_statistic_category_container stats_;
 	/// The time of the last processed event.

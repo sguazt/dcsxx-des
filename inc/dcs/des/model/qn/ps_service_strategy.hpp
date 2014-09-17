@@ -51,7 +51,6 @@ class ps_service_strategy: public base_service_strategy<TraitsT>
 	private: typedef base_service_strategy<TraitsT> base_type;
 	public: typedef TraitsT traits_type;
 	public: typedef typename base_type::real_type real_type;
-	public: typedef typename base_type::uint_type uint_type;
 	private: typedef typename base_type::customer_type customer_type;
 	public: typedef typename base_type::customer_pointer customer_pointer;
 	public: typedef ::dcs::math::stats::any_distribution<real_type> distribution_type;
@@ -179,7 +178,7 @@ class ps_service_strategy: public base_service_strategy<TraitsT>
 		{
 			customer_set const& customers(*srv_it);
 
-			uint_type nc(customers.size());
+			std::size_t nc(customers.size());
 			real_type share(this->common_share()/static_cast<real_type>(nc));
 			customer_iterator cust_end_it(customers.end());
 			for (customer_iterator cust_it = customers.begin(); cust_it != cust_end_it; ++cust_it)
@@ -237,7 +236,7 @@ class ps_service_strategy: public base_service_strategy<TraitsT>
 			// by a factor of n, where n is the number of customer (included
 			// the last arrived) running on this server.
 
-			uint_type nc(servers_[next_srv_].size()+1); // +1 ... to take into consideration the just inserted customer
+			std::size_t nc(servers_[next_srv_].size()+1); // +1 ... to take into consideration the just inserted customer
 
 			share /= static_cast<real_type>(nc);
 
@@ -292,7 +291,7 @@ class ps_service_strategy: public base_service_strategy<TraitsT>
 		customer_identifier_type cid(ptr_customer->id());
 
 		// Retrieve the server assigned to this customer
-		uint_type sid(this->info(cid).server_id());
+		std::size_t sid(this->info(cid).server_id());
 
 		// Erase the associated service info 
 		servers_[sid].erase(cid);
@@ -302,7 +301,7 @@ class ps_service_strategy: public base_service_strategy<TraitsT>
 		}
 		else
 		{
-			uint_type nc(servers_[sid].size()+1); // +1 ... to take into consideration the just removed customer
+			std::size_t nc(servers_[sid].size()+1); // +1 ... to take into consideration the just removed customer
 			real_type share(this->common_share()/static_cast<real_type>(nc-1));
 
 			typedef typename customer_set::iterator customer_iterator;
@@ -337,7 +336,7 @@ class ps_service_strategy: public base_service_strategy<TraitsT>
 		servers_.clear();
 		servers_.resize(ns_);
 		num_busy_ = next_srv_
-				  = uint_type/*zero*/();
+				  = std::size_t/*zero*/();
 	}
 
 
@@ -346,17 +345,17 @@ class ps_service_strategy: public base_service_strategy<TraitsT>
 		servers_.clear();
 		servers_.resize(ns_);
 		num_busy_ = next_srv_
-				  = uint_type/*zero*/();
+				  = std::size_t/*zero*/();
 	}
 
 
-	private: uint_type do_num_servers() const
+	private: std::size_t do_num_servers() const
 	{
 		return ns_;
 	}
 
 
-	private: uint_type do_num_busy_servers() const
+	private: std::size_t do_num_busy_servers() const
 	{
 		return num_busy_;
 	}
@@ -364,17 +363,17 @@ class ps_service_strategy: public base_service_strategy<TraitsT>
 	//@} Interface member functions
 
 
-	private: uint_type next_server(uint_type start_sid) const
+	private: std::size_t next_server(std::size_t start_sid) const
 	{
-		uint_type best_sid(start_sid);
+		std::size_t best_sid(start_sid);
 
 		if (ns_ > 1 && servers_[start_sid].size() > 0)
 		{
 			// choose the server with the smallest number of served customers
-			uint_type best_sid_size(servers_[best_sid].size());
-			for (uint_type i = 1; i < ns_ && best_sid_size > 0; ++i)
+			std::size_t best_sid_size(servers_[best_sid].size());
+			for (std::size_t i = 1; i < ns_ && best_sid_size > 0; ++i)
 			{
-				uint_type sid((start_sid+i) % ns_);
+				std::size_t sid((start_sid+i) % ns_);
 				if (servers_[sid].size() < servers_[best_sid].size())
 				{
 					best_sid = sid;
@@ -390,15 +389,15 @@ class ps_service_strategy: public base_service_strategy<TraitsT>
 	//@{ Data members
 
 	/// The total number of servers.
-	private: uint_type ns_;
+	private: std::size_t ns_;
 	/// The servers container. For each server, it maintains the list of customers currently running on it.
 	private: server_container servers_;
 	/// The service distributions container.
 	private: distribution_container distrs_;
 	/// The number of current busy severs.
-	private: uint_type num_busy_;
+	private: std::size_t num_busy_;
 	/// The next server used to assign a new customer.
-	private: uint_type next_srv_;
+	private: std::size_t next_srv_;
 
 	//@} Data members
 };

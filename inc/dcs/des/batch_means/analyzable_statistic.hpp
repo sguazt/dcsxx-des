@@ -30,6 +30,7 @@
 
 
 #include <cmath>
+#include <cstddef>
 #include <cstdlib>
 #include <dcs/debug.hpp>
 #include <dcs/des/base_analyzable_statistic.hpp>
@@ -58,35 +59,31 @@ namespace dcs { namespace des { namespace batch_means {
  */
 template <
 	typename StatisticT,
-	typename TransientDetectorT=::dcs::des::spectral::pawlikowski1990_transient_detector<typename StatisticT::value_type, typename StatisticT::uint_type>,
-	typename BatchSizeDetectorT=pawlikowski1990_batch_size_detector<typename StatisticT::value_type, typename StatisticT::uint_type>
+	typename TransientDetectorT=::dcs::des::spectral::pawlikowski1990_transient_detector<typename StatisticT::value_type>,
+	typename BatchSizeDetectorT=pawlikowski1990_batch_size_detector<typename StatisticT::value_type>
 >
-class analyzable_statistic: public base_analyzable_statistic<
-									typename StatisticT::value_type,
-									typename StatisticT::uint_type
-							>
+class analyzable_statistic: public base_analyzable_statistic<typename StatisticT::value_type>
 {
 	public: typedef StatisticT statistic_type;
 	public: typedef typename statistic_type::value_type value_type;
-	public: typedef typename statistic_type::uint_type uint_type;
 	public: typedef TransientDetectorT transient_phase_detector_type;
 	public: typedef BatchSizeDetectorT batch_size_detector_type;
 //	public: typedef typename statistic_type::category_type category_type;
-	private: typedef base_analyzable_statistic<value_type,uint_type> base_type;
+	private: typedef base_analyzable_statistic<value_type> base_type;
 
 
 	public: static const value_type default_confidence_level;// = 0.95;
-	public: static const uint_type default_min_num_batches = 10;
+	public: static const std::size_t default_min_num_batches = 10;
 	public: static const bool default_use_schmeiser_rule = false;
-	public: static const uint_type default_schmeiser_rule_batch_size = 30;
-	public: static const uint_type default_max_num_obs;// = base_type::num_observations_infinity;
+	public: static const std::size_t default_schmeiser_rule_batch_size = 30;
+	public: static const std::size_t default_max_num_obs;// = base_type::num_observations_infinity;
 	public: static const value_type default_half_width;// = ::dcs::math::constants::infinity<value_type>::value;
 
 
 	/// A constructor.
 	public: explicit analyzable_statistic(value_type relative_precision = base_type::default_target_relative_precision,
-										  uint_type max_num_obs=default_max_num_obs,
-										  uint_type min_num_batches=default_min_num_batches)
+										  std::size_t max_num_obs=default_max_num_obs,
+										  std::size_t min_num_batches=default_min_num_batches)
 	: base_type(relative_precision),
 	  stat_(),
 	  trans_detector_(),
@@ -124,8 +121,8 @@ class analyzable_statistic: public base_analyzable_statistic<
 								 transient_phase_detector_type const& transient_detector,
 								 batch_size_detector_type const& size_detector,
 								 value_type relative_precision = base_type::default_target_relative_precision,
-								 uint_type max_num_obs = default_max_num_obs,
-								 uint_type min_num_batches =  default_min_num_batches)
+								 std::size_t max_num_obs = default_max_num_obs,
+								 std::size_t min_num_batches =  default_min_num_batches)
 	: base_type(relative_precision),
 	  stat_(stat),
 	  trans_detector_(transient_detector),
@@ -146,7 +143,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 	}
 
 
-	public: void enable_schmeiser_rule(uint_type schmeiser_rule_batch_size=default_schmeiser_rule_batch_size)
+	public: void enable_schmeiser_rule(std::size_t schmeiser_rule_batch_size=default_schmeiser_rule_batch_size)
 	{
 		use_schmeiser_rule_ = true;
 		k_b0_ = schmeiser_rule_batch_size;
@@ -165,19 +162,19 @@ class analyzable_statistic: public base_analyzable_statistic<
 	}
 
 
-	public: uint_type batch_size() const
+	public: std::size_t batch_size() const
 	{
 		return batch_size_;
 	}
 
 
-	public: uint_type actual_batch_size() const
+	public: std::size_t actual_batch_size() const
 	{
 		return batch_size_-(count_ % batch_size_);
 	}
 
 
-	public: uint_type num_batches() const
+	public: std::size_t num_batches() const
 	{
 		return stat_.num_observations();
 	}
@@ -353,7 +350,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 
 		count_ = trans_len_
 			   = batch_size_
-			   = uint_type(0);
+			   = std::size_t(0);
 
 //		batch_mean_ = half_width_
 //					= value_type(0);
@@ -376,7 +373,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 //	}
 
 
-	private: uint_type do_num_observations() const
+	private: std::size_t do_num_observations() const
 	{
 		return count_;
 	}
@@ -412,7 +409,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 	}
 
 
-	private: uint_type do_max_num_observations() const
+	private: std::size_t do_max_num_observations() const
 	{
 		return max_num_obs_;
 	}
@@ -424,7 +421,7 @@ class analyzable_statistic: public base_analyzable_statistic<
 //	}
 
 
-	private: uint_type do_transient_phase_length() const
+	private: std::size_t do_transient_phase_length() const
 	{
 		return trans_len_;
 	}
@@ -516,18 +513,18 @@ class analyzable_statistic: public base_analyzable_statistic<
 				// observations into k_b0 means of longer batches
 				// (see (Schmeiser, 1982)
 
-				uint_type k_be = num_batches();
-				uint_type m = k_be / k_b0_;
+				std::size_t k_be = num_batches();
+				std::size_t m = k_be / k_b0_;
 
 				value_type grand_mean = 0;
 				value_type grand_sd = 0;
 
-				uint_type i = 0;
-				for (uint_type j = 0; j < k_b0_; ++j)
+				std::size_t i = 0;
+				for (std::size_t j = 0; j < k_b0_; ++j)
 				{
 					value_type sum = 0;
 
-					for (uint_type r = 0; r < m; ++r)
+					for (std::size_t r = 0; r < m; ++r)
 					{
 						//sum += obs_[j*m+r];
 						sum += batch_means_[i];
@@ -585,23 +582,23 @@ class analyzable_statistic: public base_analyzable_statistic<
 	private: transient_phase_detector_type trans_detector_;
 	private: batch_size_detector_type size_detector_;
 	/// The target relative precision
-	private: /*const*/ uint_type min_num_batches_;
-	private: /*const*/ uint_type max_num_obs_;
+	private: /*const*/ std::size_t min_num_batches_;
+	private: /*const*/ std::size_t max_num_obs_;
 	private: /*const*/ bool use_schmeiser_rule_;
-	private: /*const*/ uint_type k_b0_;
+	private: /*const*/ std::size_t k_b0_;
 	/// The reached relative precision
 	private: value_type rel_prec_;
 	/// The total number of observations (this is different from the number of
 	/// batch means).
-	private: uint_type count_;
+	private: std::size_t count_;
 	/// The half-wdith of the confidence interval at ci_level_ confidence level.
 	private: value_type half_width_;
 	private: bool trans_detected_;
-	private: uint_type trans_len_;
+	private: std::size_t trans_len_;
 	private: bool batch_size_detected_;
-	private: uint_type batch_size_;
+	private: std::size_t batch_size_;
 	//private: value_type batch_mean_;
-	private: weighted_mean_estimator<value_type,uint_type> batch_mean_;
+	private: weighted_mean_estimator<value_type> batch_mean_;
 	private: ::std::vector<value_type> batch_means_;
 	private: value_type steady_start_time_;
 };
@@ -611,7 +608,7 @@ template <
 	typename TransientDetectorT,
 	typename BatchSizeDetectorT
 >
-const typename StatisticT::uint_type analyzable_statistic<StatisticT,TransientDetectorT,BatchSizeDetectorT>::default_max_num_obs = base_analyzable_statistic<typename StatisticT::value_type,typename StatisticT::uint_type>::num_observations_infinity;
+const std::size_t analyzable_statistic<StatisticT,TransientDetectorT,BatchSizeDetectorT>::default_max_num_obs = base_analyzable_statistic<typename StatisticT::value_type>::num_observations_infinity;
 
 template <
 	typename StatisticT,

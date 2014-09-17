@@ -47,14 +47,13 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 	private: typedef base_service_strategy<TraitsT> base_type;
 	public: typedef TraitsT traits_type;
 	public: typedef typename base_type::real_type real_type;
-	public: typedef typename base_type::uint_type uint_type;
 	private: typedef typename base_type::customer_type customer_type;
 	public: typedef typename base_type::customer_pointer customer_pointer;
 	public: typedef ::dcs::math::stats::any_distribution<real_type> distribution_type;
 	private: typedef ::std::vector<distribution_type> distribution_container;
-	private: typedef ::std::map<uint_type,customer_pointer> server_container;
+	private: typedef ::std::map<std::size_t,customer_pointer> server_container;
 	private: typedef typename customer_type::identifier_type customer_identifier_type;
-//	private: typedef ::std::map<customer_identifier_type,uint_type> customer_server_map;
+//	private: typedef ::std::map<customer_identifier_type,std::size_t> customer_server_map;
 	private: typedef typename base_type::random_generator_type random_generator_type;
 	private: typedef typename traits_type::class_identifier_type class_identifier_type;
 	private: typedef typename base_type::runtime_info_type runtime_info_type;
@@ -198,7 +197,7 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 			iterator end_it(servers_.end());
 			for (iterator it = servers_.begin(); it != end_it; ++it)
 			{
-				uint_type sid(it->first);
+				std::size_t sid(it->first);
 				customer_pointer ptr_customer(it->second);
 
 				// paranoid-check: null
@@ -303,8 +302,8 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 		customer_identifier_type cid(ptr_customer->id());
 
 		// Retrieve the server assigned to this customer
-//		uint_type s_id = customers_servers_[c_id];
-		uint_type sid(this->info(cid).server_id());
+//		std::size_t s_id = customers_servers_[c_id];
+		std::size_t sid(this->info(cid).server_id());
 
 		// Erase the associated service info 
 		servers_.erase(sid);
@@ -317,7 +316,7 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 	{
 		servers_.clear();
 //		servers_.resize(ns_);
-		num_busy_ = uint_type/*zero*/();
+		num_busy_ = std::size_t/*zero*/();
 	}
 
 
@@ -325,20 +324,20 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 	{
 		servers_.clear();
 //		servers_.resize(ns_);
-		num_busy_ = uint_type/*zero*/();
+		num_busy_ = std::size_t/*zero*/();
 		old_share_ = this->share();
 		old_multiplier_ = this->capacity_multiplier();
 //		customers_servers_.clear();
 	}
 
 
-	private: uint_type do_num_servers() const
+	private: std::size_t do_num_servers() const
 	{
 		return ns_;
 	}
 
 
-	private: uint_type do_num_busy_servers() const
+	private: std::size_t do_num_busy_servers() const
 	{
 		return num_busy_;
 	}
@@ -348,10 +347,10 @@ class load_independent_service_strategy: public base_service_strategy<TraitsT>
 
 	//@{ Data members
 
-	private: uint_type ns_;
+	private: std::size_t ns_;
 	private: server_container servers_;
 	private: distribution_container distrs_;
-	private: uint_type num_busy_;
+	private: std::size_t num_busy_;
 	private: real_type old_share_;
 	private: real_type old_multiplier_;
 //	private: customer_server_map customers_servers_;

@@ -30,6 +30,7 @@
 
 
 #include <cmath>
+#include <cstddef>
 #include <cstdlib>
 #include <dcs/debug.hpp>
 #include <dcs/des/base_statistic.hpp>
@@ -68,12 +69,11 @@ namespace dcs { namespace des {
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename ValueT, typename UIntT>
-class weighted_mean_estimator: public base_statistic<ValueT,UIntT>
+template <typename ValueT>
+class weighted_mean_estimator: public base_statistic<ValueT>
 {
-	private: typedef base_statistic<ValueT,UIntT> base_type;
+	private: typedef base_statistic<ValueT> base_type;
 	public: typedef ValueT value_type;
-	public: typedef UIntT uint_type;
 	public: typedef mean_statistic_category category_type;
 
 
@@ -139,7 +139,7 @@ class weighted_mean_estimator: public base_statistic<ValueT,UIntT>
 	}
 
 
-	private: uint_type do_num_observations() const
+	private: std::size_t do_num_observations() const
 	{
 		return count_;
 	}
@@ -161,7 +161,7 @@ class weighted_mean_estimator: public base_statistic<ValueT,UIntT>
 		m_	= s2_
 			= sumw_
 			= value_type(0);
-		count_ = uint_type(0);
+		count_ = std::size_t(0);
 	}
 
 
@@ -179,7 +179,7 @@ class weighted_mean_estimator: public base_statistic<ValueT,UIntT>
 	}
 
 
-	private: uint_type count_; ///< Number of observations seen to date.
+	private: std::size_t count_; ///< Number of observations seen to date.
 	private: value_type m_; ///< Accumulator for the weighted mean.
 	private: value_type s2_; ///< Accumulator for the weighted variance.
 	private: value_type sumw_; ///< Accumulator for the sum of weights

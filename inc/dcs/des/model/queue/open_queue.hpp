@@ -61,7 +61,6 @@ namespace dcs { namespace des { namespace model {
  * \brief Model for open queue (i.e., with infinite population).
  *
  * \tparam RealT The type used for real numbers.
- * \tparam UIntT The type used for unsigned integral numbers.
  * \tparam ArrivalDistributionT The interarrival-time distribution type.
  * \tparam ServiceDistributionT The service-time distribution type.
  * \tparam UniformRandomGeneratorT The uniform random number generator type
@@ -73,22 +72,19 @@ namespace dcs { namespace des { namespace model {
  */
 template <
 	typename RealT=double,
-	typename UIntT=::std::size_t, 
 	typename ArrivalDistributionT=::dcs::math::stats::any_distribution<RealT>,
 	typename ServiceDistributionT=::dcs::math::stats::any_distribution<RealT>,
 	typename UniformRandomGeneratorT=::dcs::math::random::any_generator<RealT>,
 	typename QueuePolicyT=fifo_queue_policy< queue_job<RealT> >,
 	typename DesEngineT=::dcs::des::engine<RealT>,
-	typename OutputStatisticT=::dcs::des::any_statistic<RealT,UIntT>
+	typename OutputStatisticT=::dcs::des::any_statistic<RealT>
 >
 class open_queue
 {
 	/// This type
-	private: typedef open_queue<RealT,UIntT,ArrivalDistributionT,ServiceDistributionT,UniformRandomGeneratorT,QueuePolicyT,DesEngineT,OutputStatisticT> self_type;
+	private: typedef open_queue<RealT,ArrivalDistributionT,ServiceDistributionT,UniformRandomGeneratorT,QueuePolicyT,DesEngineT,OutputStatisticT> self_type;
 	/// The type used for real numbers.
 	public: typedef RealT real_type;
-	/// The type used for unsigned integral numbers.
-	public: typedef UIntT uint_type;
 	/// The interarrival-time distribution type (model of ProbabilityDistribution concept).
 	public: typedef ArrivalDistributionT arrival_distribution_type;
 	/// The service-time distribution type (model of ProbabilityDistribution concept).
@@ -124,7 +120,7 @@ class open_queue
 
 
 	/// A constructor.
-	public: open_queue(arrival_distribution_type const& iatime_distr, service_distribution_type const& svctime_distr, uint_type num_servers, bool queue_is_finite, uint_type max_queue_length, random_generator_type& rng, ::boost::shared_ptr<des_engine_type> const& ptr_eng)
+	public: open_queue(arrival_distribution_type const& iatime_distr, service_distribution_type const& svctime_distr, std::size_t num_servers, bool queue_is_finite, std::size_t max_queue_length, random_generator_type& rng, ::boost::shared_ptr<des_engine_type> const& ptr_eng)
 		: ptr_arrival_evt_src_(new des_event_source_type()),
 		  ptr_departure_evt_src_(new des_event_source_type()),
 		  ptr_discard_evt_src_(new des_event_source_type()),
@@ -338,7 +334,7 @@ class open_queue
 	 * \brief Compute the total number of client request arrivals.
 	 * \return The total number of client request arrivals.
 	 */
-	public: uint_type num_arrivals() const
+	public: std::size_t num_arrivals() const
 	{
 		return num_arrivals_;
 	}
@@ -348,7 +344,7 @@ class open_queue
 	 * \brief Compute the total number of client request departures.
 	 * \return The total number of client request departures.
 	 */
-	public: uint_type num_departures() const
+	public: std::size_t num_departures() const
 	{
 		return num_departures_;
 	}
@@ -358,7 +354,7 @@ class open_queue
 	 * \brief Compute the total number of client request discards.
 	 * \return The total number of client request discards.
 	 */
-	public: uint_type num_discards() const
+	public: std::size_t num_discards() const
 	{
 		return num_discards_;
 	}
@@ -398,7 +394,7 @@ class open_queue
 //		num_arrivals_ = num_departures_
 //					  = num_discards_
 //					  = cur_num_busy_
-//					  = uint_type(0);
+//					  = std::size_t(0);
 //
 ////		area_ = real_type(0);
 //		last_evt_time_ = real_type(0);
@@ -499,7 +495,7 @@ class open_queue
 //		num_arrivals_ = num_departures_
 //					  = num_discards_
 //					  = cur_num_busy_
-//					  = uint_type(0);
+//					  = std::size_t(0);
 //
 ////		area_ = real_type(0);
 //		last_evt_time_ = real_type(0);
@@ -528,7 +524,7 @@ class open_queue
 		num_arrivals_ = num_departures_
 					  = num_discards_
 					  = cur_num_busy_
-					  = uint_type(0);
+					  = std::size_t(0);
 
 //		area_ = real_type(0);
 		last_evt_time_ = real_type(0);
@@ -605,7 +601,7 @@ class open_queue
 		real_type interval = ctx.simulated_time() - last_evt_time_;
 
 		// Update the number of waiting requests.
-		uint_type cur_num_wait = queue_.size();
+		std::size_t cur_num_wait = queue_.size();
 //		if (queue_.size() > 0)
 //		{
 //			// We subtract 1 to queue size since we don't include the job that
@@ -613,7 +609,7 @@ class open_queue
 //			cur_num_wait = queue_.size()-1;
 //		}
 
-		//uint_type cur_num_sys = cur_num_wait+cur_num_busy_;
+		//std::size_t cur_num_sys = cur_num_wait+cur_num_busy_;
 
 //		//area_ += interval*(num_arrivals_-num_departures_-num_discards_);
 //		area_ += interval*cur_num_wait;
@@ -841,17 +837,17 @@ class open_queue
 	private: ::boost::shared_ptr<des_event_source_type> ptr_discard_evt_src_;
 	private: arrival_distribution_type iatime_distr_;
 	private: service_distribution_type svctime_distr_;
-	private: /*const*/ uint_type num_srv_;
+	private: /*const*/ std::size_t num_srv_;
 	private: /*const*/ bool queue_is_finite_;
-	private: /*const*/ uint_type max_queue_len_;
+	private: /*const*/ std::size_t max_queue_len_;
 	private: random_generator_type rng_;
 	private: ::boost::shared_ptr<des_engine_type> ptr_eng_;
 	private: queue_policy_type queue_;
 	private: real_type svc_share_;
-	private: uint_type num_arrivals_;
-	private: uint_type num_departures_;
-	private: uint_type num_discards_;
-	private: uint_type cur_num_busy_;
+	private: std::size_t num_arrivals_;
+	private: std::size_t num_departures_;
+	private: std::size_t num_discards_;
+	private: std::size_t cur_num_busy_;
 	//private: ::std::vector< ::std::vector< ::boost::shared_ptr<output_statistic_type> > > stats_;
 	private: output_statistic_category_container stats_;
 	private: event_tags cur_evt_tag_;

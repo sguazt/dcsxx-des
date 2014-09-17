@@ -30,6 +30,7 @@
 
 
 #include <boost/smart_ptr.hpp>
+#include <cstddef>
 #include <dcs/des/base_statistic.hpp>
 #include <dcs/des/statistic_adaptor.hpp>
 #include <dcs/des/statistic_categories.hpp>
@@ -48,15 +49,14 @@ namespace dcs { namespace des {
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename ValueT, typename UIntT>
+template <typename ValueT>
 class any_statistic
 {
 	public: typedef ValueT value_type;
-	public: typedef UIntT uint_type;
 
 
-	public: template <typename CharT, typename CharTraits, typename VT, typename UT>
-		friend ::std::basic_ostream<CharT,CharTraits>& operator<<(::std::basic_ostream<CharT,CharTraits>& os, any_statistic<VT,UT> const& stat);
+	public: template <typename CharT, typename CharTraits, typename VT>
+		friend ::std::basic_ostream<CharT,CharTraits>& operator<<(::std::basic_ostream<CharT,CharTraits>& os, any_statistic<VT> const& stat);
 
 
 	public: any_statistic() { }
@@ -108,7 +108,7 @@ class any_statistic
 	}
 
 
-	public: uint_type num_observations() const
+	public: std::size_t num_observations() const
 	{
 		return ptr_stat_->num_observations();
 	}
@@ -168,29 +168,28 @@ class any_statistic
 	///@} Statistic concept implementation
 
 
-	protected: base_statistic<value_type,uint_type>& statistic()
+	protected: base_statistic<value_type>& statistic()
 	{
 		return *ptr_stat_;
 	}
 
 
-	protected: base_statistic<value_type,uint_type> const& statistic() const
+	protected: base_statistic<value_type> const& statistic() const
 	{
 		return *ptr_stat_;
 	}
 
 
-	private: ::boost::shared_ptr< base_statistic<value_type,uint_type> > ptr_stat_;
-};
+	private: ::boost::shared_ptr< base_statistic<value_type> > ptr_stat_;
+}; // any_statistic
 
 
 template <
 	typename CharT,
 	typename CharTraits,
-	typename ValueT,
-	typename UIntT
+	typename ValueT
 >
-::std::basic_ostream<CharT,CharTraits>& operator<<(::std::basic_ostream<CharT,CharTraits>& os, any_statistic<ValueT,UIntT> const& stat)
+::std::basic_ostream<CharT,CharTraits>& operator<<(::std::basic_ostream<CharT,CharTraits>& os, any_statistic<ValueT> const& stat)
 {
 //	return stat.print(os);
 	os << *(stat.ptr_stat_);
@@ -205,10 +204,7 @@ template <
 >
 struct make_any_statistic_type
 {
-	typedef any_statistic<
-				typename StatisticTraitsT::value_type,
-				typename StatisticTraitsT::uint_type
-			> type;
+	typedef any_statistic<typename StatisticTraitsT::value_type> type;
 };
 
 

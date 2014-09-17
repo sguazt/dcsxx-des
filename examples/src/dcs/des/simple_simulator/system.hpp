@@ -64,11 +64,11 @@ class system
 	private: typedef system<RealT,UIntT> self_type;
 	private: typedef RealT real_type;
 	private: typedef UIntT uint_type;
-	private: typedef ::dcs::des::batch_means::engine<real_type,uint_type> des_engine_type;
+	private: typedef ::dcs::des::batch_means::engine<real_type> des_engine_type;
 	private: typedef typename des_engine_type::event_source_type des_event_source_type;
 	private: typedef typename des_engine_type::event_type des_event_type;
 	private: typedef typename des_engine_type::engine_context_type des_engine_context_type;
-	private: typedef ::dcs::des::base_analyzable_statistic<real_type,uint_type> output_statistic_type;
+	private: typedef ::dcs::des::base_analyzable_statistic<real_type> output_statistic_type;
 
 
 	// Default values.
@@ -107,9 +107,9 @@ class system
 	public: void average_task_completion_time(real_type relative_precision, real_type confidence_level, uint_type max_num_obs)
 	{
 		ptr_avg_task_completion_time_ = dcs::des::make_analyzable_statistic(
-			::dcs::des::mean_estimator<real_type,uint_type>(confidence_level),
-			::dcs::des::spectral::pawlikowski1990_transient_detector<real_type,uint_type>(),
-			::dcs::des::batch_means::pawlikowski1990_batch_size_detector<real_type,uint_type>(),
+			::dcs::des::mean_estimator<real_type>(confidence_level),
+			::dcs::des::spectral::pawlikowski1990_transient_detector<real_type>(),
+			::dcs::des::batch_means::pawlikowski1990_batch_size_detector<real_type>(),
 			des_engine_,
 			relative_precision,
 			//confidence_level,
@@ -129,9 +129,9 @@ class system
 	public: void average_task_waiting_time(real_type relative_precision, real_type confidence_level, uint_type max_num_obs)
 	{
 		ptr_avg_task_waiting_time_ = ::dcs::des::make_analyzable_statistic(
-			::dcs::des::mean_estimator<real_type,uint_type>(confidence_level),
-			::dcs::des::spectral::pawlikowski1990_transient_detector<real_type,uint_type>(),
-			::dcs::des::batch_means::pawlikowski1990_batch_size_detector<real_type,uint_type>(),
+			::dcs::des::mean_estimator<real_type>(confidence_level),
+			::dcs::des::spectral::pawlikowski1990_transient_detector<real_type>(),
+			::dcs::des::batch_means::pawlikowski1990_batch_size_detector<real_type>(),
 			des_engine_,
 			relative_precision,
 			//confidence_level,

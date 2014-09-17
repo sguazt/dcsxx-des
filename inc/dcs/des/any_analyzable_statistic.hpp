@@ -45,11 +45,10 @@ namespace dcs { namespace des {
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename ValueT, typename UIntT>
+template <typename ValueT>
 class any_analyzable_statistic
 {
 	public: typedef ValueT value_type;
-	public: typedef UIntT uint_type;
 
 
 	public: any_analyzable_statistic() { }
@@ -104,7 +103,7 @@ class any_analyzable_statistic
     }
 
 
-    public: uint_type num_observations() const
+    public: std::size_t num_observations() const
     {
         return ptr_stat_->num_observations();
     }
@@ -174,7 +173,7 @@ class any_analyzable_statistic
 	}
 
 
-	public: uint_type max_num_observations() const
+	public: std::size_t max_num_observations() const
 	{
 		return this->statistic().max_num_observations();
 	}
@@ -186,7 +185,7 @@ class any_analyzable_statistic
 	}
 
 
-	public: uint_type transient_phase_length() const
+	public: std::size_t transient_phase_length() const
 	{
 		return this->statistic().transient_phase_length();
 	}
@@ -206,7 +205,7 @@ class any_analyzable_statistic
 	///@} AnalyzbleStatistic concept implementation
 
 
-	private: ::boost::shared_ptr< base_analyzable_statistic<value_type,uint_type> > ptr_stat_;
+	private: ::boost::shared_ptr< base_analyzable_statistic<value_type,std::size_t> > ptr_stat_;
 };
 
 
@@ -216,10 +215,7 @@ template <
 >
 struct make_any_analyzable_statistic_type
 {
-	typedef any_analyzable_statistic<
-				typename StatisticTraitsT::value_type,
-				typename StatisticTraitsT::uint_type
-			> type;
+	typedef any_analyzable_statistic<typename StatisticTraitsT::value_type> type;
 };
 
 

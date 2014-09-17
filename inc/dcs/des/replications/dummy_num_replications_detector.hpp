@@ -27,23 +27,20 @@
 #define DCS_DES_REPLICATIONS_DUMMY_NUM_REPLICATIONS_DETECTOR_HPP
 
 
+#include <cstddef>
 #include <dcs/macro.hpp>
 
 
 namespace dcs { namespace des { namespace replications {
 
-template <
-	typename RealT,
-	typename UIntT
->
+template <typename RealT>
 class dummy_num_replications_detector
 {
 	public: typedef RealT real_type;
-	public: typedef UIntT uint_type;
 
 
 	// At least 2 replications are needed to compute variance and similar stats.
-	private: static const uint_type num_replications_ = 1;
+	private: static const std::size_t num_replications_ = 1;
 
 
 	public: dummy_num_replications_detector()
@@ -52,7 +49,7 @@ class dummy_num_replications_detector
 	}
 
 
-	public: bool detect(uint_type r_cur, real_type estimate, real_type stddev)
+	public: bool detect(std::size_t r_cur, real_type estimate, real_type stddev)
 	{
 		DCS_MACRO_SUPPRESS_UNUSED_VARIABLE_WARNING( r_cur );
 		DCS_MACRO_SUPPRESS_UNUSED_VARIABLE_WARNING( estimate );
@@ -74,7 +71,7 @@ class dummy_num_replications_detector
 	}
 
 
-	public: uint_type estimated_number() const
+	public: std::size_t estimated_number() const
 	{
 		return num_replications_;
 	}

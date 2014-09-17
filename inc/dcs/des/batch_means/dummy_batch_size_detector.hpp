@@ -51,19 +51,17 @@ namespace dcs { namespace des { namespace batch_means {
  * \brief Dummy batch size detector.
  *
  * \tparam RealT The type used for real numbers.
- * \tparam UIntT The type used for unsigned integral numbers.
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename RealT=double, typename UIntT=::std::size_t>
+template <typename RealT=double>
 class dummy_batch_size_detector
 {
 	public: typedef RealT real_type;
-	public: typedef UIntT uint_type;
 	public: typedef ::std::vector<real_type> vector_type;
 
 
-	private: static const uint_type batch_size_ = 0;
+	private: static const std::size_t batch_size_ = 0;
 
 
 	/// A constructor.
@@ -120,7 +118,7 @@ class dummy_batch_size_detector
 	}
 
 
-	public: uint_type estimated_size() const
+	public: std::size_t estimated_size() const
 	{
 		return batch_size_;
 	}

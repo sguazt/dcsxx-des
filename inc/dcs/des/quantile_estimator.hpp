@@ -33,6 +33,7 @@
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/p_square_quantile.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
+#include <cstddef>
 #include <dcs/des/base_statistic.hpp>
 #include <dcs/des/statistic_categories.hpp>
 #include <dcs/math/constants.hpp>
@@ -67,12 +68,11 @@ std::string make_name(RealT p)
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename ValueT, typename UIntT>
-class quantile_estimator: public base_statistic<ValueT,UIntT>
+template <typename ValueT>
+class quantile_estimator: public base_statistic<ValueT>
 {
-	private: typedef base_statistic<ValueT,UIntT> base_type;
+	private: typedef base_statistic<ValueT> base_type;
 	public: typedef ValueT value_type;
-	public: typedef UIntT uint_type;
 	public: typedef quantile_statistic_category category_type;
 	private: typedef ::boost::accumulators::accumulator_set<
 				value_type,
@@ -122,7 +122,7 @@ class quantile_estimator: public base_statistic<ValueT,UIntT>
 	}
 
 
-	private: uint_type do_num_observations() const
+	private: std::size_t do_num_observations() const
 	{
 		return ::boost::accumulators::count(acc_);
 	}
@@ -138,9 +138,9 @@ class quantile_estimator: public base_statistic<ValueT,UIntT>
 	{
 		if (this->num_observations() > 1)
 		{
-			uint_type n(this->num_observations());
+			std::size_t n(this->num_observations());
 			::dcs::math::stats::students_t_distribution<value_type> t_dist(n-1);
-			value_type t(::dcs::math::stats::quantile(t_dist, (1+this->confidence_interval())/value_type(2)));
+			value_type t(::dcs::math::stats::quantile(t_dist, (1+this->confidence_level())/value_type(2)));
 			value_type q(this->estimate());
 
 			return t*::std::sqrt(q*(1-q)/(this->num_observations()-1));

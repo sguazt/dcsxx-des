@@ -29,6 +29,7 @@
 #define DCS_DES_REPLICATIONS_DUMMY_REPLICATION_SIZE_DETECTOR_HPP
 
 
+#include <cstddef>
 #include <dcs/macro.hpp>
 #include <utility>
 #include <vector>
@@ -40,20 +41,18 @@ namespace dcs { namespace des { namespace replications {
  * \brief Replication size detector based on a fixed number of observations.
  *
  * \tparam RealT The type used for real numbers.
- * \tparam UIntT The type used for unsigned integral numbers.
  *
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename RealT, typename UIntT>
+template <typename RealT>
 class dummy_replication_size_detector
 {
 	public: typedef RealT real_type;
-	public: typedef UIntT uint_type;
 	public: typedef ::std::pair<real_type,real_type> sample_type;
 	public: typedef ::std::vector<sample_type> vector_type;
 
 
-	private: static const uint_type replication_size_ = 0;
+	private: static const std::size_t replication_size_ = 0;
 
 
 	/**
@@ -113,7 +112,7 @@ class dummy_replication_size_detector
 	}
 
 
-	public: uint_type estimated_size() const
+	public: std::size_t estimated_size() const
 	{
 		return replication_size_;
 	}

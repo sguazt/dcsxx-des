@@ -46,11 +46,10 @@ int main()
 	typedef double real_type;
 	typedef std::size_t uint_type;
 	//typedef ublas::matrix<real_type> matrix_type;
-	typedef des::replications::engine<real_type,uint_type> des_engine_type;
+	typedef des::replications::engine<real_type> des_engine_type;
 	//typedef des_engine_type::event_type des_event_type;
 	typedef dcs::math::random::mt19937 random_generator_type;
 	typedef des_qn::queueing_network<
-				uint_type,
 				real_type,
 				random_generator_type,
 				des_engine_type
@@ -60,8 +59,7 @@ int main()
 	typedef boost::shared_ptr< des_qn::network_node<network_traits_type> > network_node_pointer;
 	typedef boost::shared_ptr< des_qn::queueing_strategy<network_traits_type> > queueing_strategy_pointer;
 	typedef boost::shared_ptr< des_qn::base_service_strategy<network_traits_type> > service_strategy_pointer;
-	typedef boost::shared_ptr< des_qn::base_routing_strategy<network_traits_type> > routing_strategy_pointer;
-	typedef des::base_statistic<real_type,uint_type> output_statistic_type;
+	typedef des::base_statistic<real_type> output_statistic_type;
 	typedef boost::shared_ptr<output_statistic_type> output_statistic_pointer;
 
 
@@ -240,10 +238,10 @@ int main()
 //		new ::dcs::des::mean_estimator<real_type,uint_type>(ci_level)
 //	);
 	ptr_stat = des::make_analyzable_statistic(
-				des::mean_estimator<real_type,uint_type>(ci_level),
-				des::null_transient_detector<real_type,uint_type>(),
-				des::replications::fixed_duration_replication_size_detector<real_type,uint_type,des_engine_type>(repl_size, ptr_des_engine),
-				des::replications::constant_num_replications_detector<real_type,uint_type>(num_repls),
+				des::mean_estimator<real_type>(ci_level),
+				des::null_transient_detector<real_type>(),
+				des::replications::fixed_duration_replication_size_detector<real_type,des_engine_type>(repl_size, ptr_des_engine),
+				des::replications::constant_num_replications_detector<real_type>(num_repls),
 				*ptr_des_engine,
 				rel_prec,
 				dcs::math::constants::infinity<uint_type>::value
@@ -251,13 +249,13 @@ int main()
 	qn.statistic(des_qn::net_response_time_statistic_category, ptr_stat);
 
 //	ptr_stat = output_statistic_pointer(
-//		new ::dcs::des::mean_estimator<real_type,uint_type>(ci_level)
+//		new ::dcs::des::mean_estimator<real_type>(ci_level)
 //	);
 //	ptr_stat = des::make_analyzable_statistic(
-//				des::mean_estimator<real_type,uint_type>(ci_level),
-//				des::null_transient_detector<real_type,uint_type>(),
-//				des::replications::fixed_duration_replication_size_detector<real_type,uint_type,des_engine_type>(repl_size, ptr_des_engine),
-//				des::replications::constant_num_replications_detector<real_type,uint_type>(num_repls),
+//				des::mean_estimator<real_type>(ci_level),
+//				des::null_transient_detector<real_type>(),
+//				des::replications::fixed_duration_replication_size_detector<real_type,des_engine_type>(repl_size, ptr_des_engine),
+//				des::replications::constant_num_replications_detector<real_type>(num_repls),
 //				*ptr_des_engine,
 //				rel_prec,
 //				dcs::math::constants::infinity<uint_type>::value

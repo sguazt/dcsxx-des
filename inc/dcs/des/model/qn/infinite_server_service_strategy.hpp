@@ -47,12 +47,11 @@ class infinite_server_service_strategy: public base_service_strategy<TraitsT>
 	private: typedef base_service_strategy<TraitsT> base_type;
 	public: typedef TraitsT traits_type;
 	public: typedef typename base_type::real_type real_type;
-	public: typedef typename base_type::uint_type uint_type;
 	private: typedef typename base_type::customer_type customer_type;
 	public: typedef typename base_type::customer_pointer customer_pointer;
 	public: typedef ::dcs::math::stats::any_distribution<real_type> distribution_type;
 	private: typedef ::std::vector<distribution_type> distribution_container;
-	private: typedef ::std::map<uint_type,customer_pointer> server_container;
+	private: typedef ::std::map<std::size_t,customer_pointer> server_container;
 	private: typedef typename customer_type::identifier_type customer_identifier_type;
 	private: typedef typename base_type::random_generator_type random_generator_type;
 	private: typedef typename traits_type::class_identifier_type class_identifier_type;
@@ -149,7 +148,7 @@ class infinite_server_service_strategy: public base_service_strategy<TraitsT>
 		customer_identifier_type cid(ptr_customer->id());
 
 		// Retrieve the server assigned to this customer
-		uint_type sid(this->info(cid).server_id());
+		std::size_t sid(this->info(cid).server_id());
 
 		// Erase the associated service info 
 		servers_.erase(sid);
@@ -160,24 +159,24 @@ class infinite_server_service_strategy: public base_service_strategy<TraitsT>
 	private: void do_remove_all()
 	{
 		servers_.clear();
-		next_srv_ = uint_type/*zero*/();
+		next_srv_ = std::size_t/*zero*/();
 	}
 
 
 	private: void do_reset()
 	{
 		servers_.clear();
-		next_srv_ = uint_type/*zero*/();
+		next_srv_ = std::size_t/*zero*/();
 	}
 
 
-	private: uint_type do_num_servers() const
+	private: std::size_t do_num_servers() const
 	{
-		return ::dcs::math::constants::infinity<uint_type>::value;
+		return ::dcs::math::constants::infinity<std::size_t>::value;
 	}
 
 
-	private: uint_type do_num_busy_servers() const
+	private: std::size_t do_num_busy_servers() const
 	{
 		return servers_.size();
 	}
@@ -186,11 +185,11 @@ class infinite_server_service_strategy: public base_service_strategy<TraitsT>
 	//@} Interface member functions
 
 
-	private: uint_type next_server(uint_type start_sid) const
+	private: std::size_t next_server(std::size_t start_sid) const
 	{
 		typedef typename server_container::const_iterator iterator;
 
-		uint_type best_sid(start_sid);
+		std::size_t best_sid(start_sid);
 
 		// Pick the first available server-id.
 		iterator end_it(servers_.end());
@@ -207,7 +206,7 @@ class infinite_server_service_strategy: public base_service_strategy<TraitsT>
 
 	private: server_container servers_;
 	private: distribution_container distrs_;
-	private: uint_type next_srv_;
+	private: std::size_t next_srv_;
 
 	//@} Data members
 };

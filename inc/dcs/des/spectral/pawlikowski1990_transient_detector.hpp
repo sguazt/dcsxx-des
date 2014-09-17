@@ -54,8 +54,8 @@ namespace dcs { namespace des { namespace spectral {
 
 namespace detail { namespace /*<unnamed>*/ {
 
-template <typename VectorT, typename UIntT, typename RealT>
-RealT schruben_statistic(::boost::numeric::ublas::vector_expression<VectorT> const& x, UIntT n_v, RealT var)
+template <typename VectorT, typename RealT>
+RealT schruben_statistic(::boost::numeric::ublas::vector_expression<VectorT> const& x, std::size_t n_v, RealT var)
 {
 	typedef RealT real_type;
 	typedef typename ::boost::numeric::ublas::vector_traits<VectorT>::size_type size_type;
@@ -83,57 +83,56 @@ RealT schruben_statistic(::boost::numeric::ublas::vector_expression<VectorT> con
 /**
  * \brief Single entry of the look-up table of C1 and C2 values.
  */
-template <typename RealT, typename UIntT>
+template <typename RealT>
 struct k_d_entry
 {
-	UIntT k;
-	UIntT d;
+	std::size_t k;
+	std::size_t d;
 	RealT c1;
-	UIntT c2;
+	std::size_t c2;
 };
 
 
 /**
  * \brief Look-up table of C1 and C2 values indexed by K and d.
  */
-template <typename RealT, typename UIntT>
+template <typename RealT>
 struct k_d_table
 {
 	typedef RealT real_type;
-	typedef UIntT uint_type;
 
-	static const k_d_entry<real_type,uint_type> table[9];
-//		{uint_type(25), uint_type(0), real_type(0.987),  uint_type(76)},
-//		{uint_type(25), uint_type(1), real_type(0.948),  uint_type(18)},
-//		{uint_type(25), uint_type(2), real_type(0.882),   uint_type(7)},
-//		{uint_type(25), uint_type(3), real_type(0.784),   uint_type(3)},
-//		{uint_type(50), uint_type(0), real_type(0.994), uint_type(154)},
-//		{uint_type(50), uint_type(1), real_type(0.974),  uint_type(37)},
-//		{uint_type(50), uint_type(2), real_type(0.941),  uint_type(16)},
-//		{uint_type(50), uint_type(3), real_type(0.895),   uint_type(8)},
-//		/*<<<*/{uint_type(5), uint_type(2), real_type(0.882),  uint_type(7)}/*>>>*/
+	static const k_d_entry<real_type> table[9];
+//		{std::size_t(25), std::size_t(0), real_type(0.987),  std::size_t(76)},
+//		{std::size_t(25), std::size_t(1), real_type(0.948),  std::size_t(18)},
+//		{std::size_t(25), std::size_t(2), real_type(0.882),   std::size_t(7)},
+//		{std::size_t(25), std::size_t(3), real_type(0.784),   std::size_t(3)},
+//		{std::size_t(50), std::size_t(0), real_type(0.994), std::size_t(154)},
+//		{std::size_t(50), std::size_t(1), real_type(0.974),  std::size_t(37)},
+//		{std::size_t(50), std::size_t(2), real_type(0.941),  std::size_t(16)},
+//		{std::size_t(50), std::size_t(3), real_type(0.895),   std::size_t(8)},
+//		/*<<<*/{std::size_t(5), std::size_t(2), real_type(0.882),  std::size_t(7)}/*>>>*/
 };
 
-template <typename RealT, typename UIntT>
-const k_d_entry<RealT,UIntT> k_d_table<RealT,UIntT>::table[] = {
+template <typename RealT>
+const k_d_entry<RealT> k_d_table<RealT>::table[] = {
 		/* k, d, c1, c2 */
-		{UIntT(25), UIntT(0), RealT(0.987),  UIntT(76)},
-		{UIntT(25), UIntT(1), RealT(0.948),  UIntT(18)},
-		{UIntT(25), UIntT(2), RealT(0.882),   UIntT(7)},
-		{UIntT(25), UIntT(3), RealT(0.784),   UIntT(3)},
-		{UIntT(50), UIntT(0), RealT(0.994), UIntT(154)},
-		{UIntT(50), UIntT(1), RealT(0.974),  UIntT(37)},
-		{UIntT(50), UIntT(2), RealT(0.941),  UIntT(16)},
-		{UIntT(50), UIntT(3), RealT(0.895),   UIntT(8)},
-		/*<<<*/{UIntT(5), UIntT(2), RealT(0.882),  UIntT(7)}/*>>>*/
+		{std::size_t(25), std::size_t(0), RealT(0.987),  std::size_t(76)},
+		{std::size_t(25), std::size_t(1), RealT(0.948),  std::size_t(18)},
+		{std::size_t(25), std::size_t(2), RealT(0.882),   std::size_t(7)},
+		{std::size_t(25), std::size_t(3), RealT(0.784),   std::size_t(3)},
+		{std::size_t(50), std::size_t(0), RealT(0.994), std::size_t(154)},
+		{std::size_t(50), std::size_t(1), RealT(0.974),  std::size_t(37)},
+		{std::size_t(50), std::size_t(2), RealT(0.941),  std::size_t(16)},
+		{std::size_t(50), std::size_t(3), RealT(0.895),   std::size_t(8)},
+		/*<<<*/{std::size_t(5), std::size_t(2), RealT(0.882),  std::size_t(7)}/*>>>*/
 };
 
 
-template <typename RealT, typename UIntT>
-::std::pair<RealT,UIntT> lookup_periodogram_delta(UIntT k, UIntT d)
+template <typename RealT>
+::std::pair<RealT,std::size_t> lookup_periodogram_delta(std::size_t k, std::size_t d)
 {
-	::std::size_t n = sizeof(k_d_table<RealT,UIntT>::table) / sizeof(k_d_table<RealT,UIntT>::table[0]);
-	k_d_entry<RealT,UIntT> const* p = &(k_d_table<RealT,UIntT>::table[0]);
+	::std::size_t n = sizeof(k_d_table<RealT>::table) / sizeof(k_d_table<RealT>::table[0]);
+	k_d_entry<RealT> const* p = &(k_d_table<RealT>::table[0]);
 	while (--n)
 	{
 		if (p->k == k && p->d == d)
@@ -365,10 +364,10 @@ static void orthogonal_polynomial_tables(::boost::numeric::ublas::vector_express
  *   Outputs:	P[k+1]		P[i] = value of polynomial i at x
  *              dP[k+1]         dP[i] = slope of polynomial i at x
  */
-template <typename Vector1T, typename Vector2T, typename RealT, typename UIntT, typename Vector3T, typename Vector4T>
+template <typename Vector1T, typename Vector2T, typename RealT, typename Vector3T, typename Vector4T>
 void orthogonal_polynomial_values(::boost::numeric::ublas::vector_expression<Vector1T> const& a,
 								  ::boost::numeric::ublas::vector_expression<Vector2T> const& b,
-								  UIntT N,
+								  std::size_t N,
 								  RealT x,
 								  ::boost::numeric::ublas::vector_container<Vector3T>& p,
 								  ::boost::numeric::ublas::vector_container<Vector4T>& dp) 
@@ -400,7 +399,6 @@ void orthogonal_polynomial_values(::boost::numeric::ublas::vector_expression<Vec
 				RealT,
 				typename ublas::type_traits<value_type>::real_type
 			>::promote_type real_type;
-	typedef UIntT uint_type;
 
 	size_type k = ublasx::size(a)-1;
 
@@ -444,10 +442,10 @@ void orthogonal_polynomial_values(::boost::numeric::ublas::vector_expression<Vec
  * this reduces to solving a diagonal system of linear
  * equations. Then we substitute to find p(0).
  */
-template <typename Vector1T, typename Vector2T, typename UIntT, typename RealT>
+template <typename Vector1T, typename Vector2T, typename RealT>
 RealT least_squares_poly_at0(::boost::numeric::ublas::vector_expression<Vector1T> const& x,
 							 ::boost::numeric::ublas::vector_expression<Vector2T> const& f,
-							 UIntT k,
+							 std::size_t k,
 							 RealT& dp0)
 {
 	namespace ublas = ::boost::numeric::ublas;
@@ -465,7 +463,6 @@ RealT least_squares_poly_at0(::boost::numeric::ublas::vector_expression<Vector1T
 				RealT,
 				typename ublas::type_traits<value_type>::real_type
 			>::promote_type real_type;
-	typedef UIntT uint_type;
 	typedef ublas::vector<real_type> vector_type;
 	typedef ublas::matrix<real_type> matrix_type;
 
@@ -491,7 +488,7 @@ RealT least_squares_poly_at0(::boost::numeric::ublas::vector_expression<Vector1T
 	orthogonal_polynomial_tables(x, phi, a, b);
 
 	/* c[i] = f.phi[i] / phi[i].phi[i] */
-	for (uint_type i = 0; i <= k; ++i)
+	for (std::size_t i = 0; i <= k; ++i)
 	{
 		c(i) = 0;
 		for (size_type n = 0; n < N; ++n)
@@ -505,14 +502,14 @@ RealT least_squares_poly_at0(::boost::numeric::ublas::vector_expression<Vector1T
 
 	/* p(0) = c . phi_0 */
 	p0 = 0;
-	for (uint_type i = 0; i <= k; ++i)
+	for (std::size_t i = 0; i <= k; ++i)
 	{
 		p0 += c(i) * phi_0(i);
 	}
 
 	/* p'(0) = c . dphi_0 */
 	dp0 = 0;
-	for (uint_type i = 0; i <= k; ++i)
+	for (std::size_t i = 0; i <= k; ++i)
 	{
 		dp0 += c(i) * dphi_0(i);
 	}
@@ -537,13 +534,13 @@ enum slope_protection_category
  * \see Philip Heidelberger and Peter D. Welch. "A spectral method for confidence interval generation and run length control in simulations. Communications of the ACM, vol. 24(4) (1981)
  *
  */
-template <typename VectorT, typename UIntT, typename RealT>
+template <typename VectorT, typename RealT>
 bool spectral_anova(::boost::numeric::ublas::vector_expression<VectorT> const& x,
-					UIntT num_per_points,
-					UIntT delta,
+					std::size_t num_per_points,
+					std::size_t delta,
 					slope_protection_category slope_protection,
 					RealT &var,
-					UIntT &kappa)
+					std::size_t &kappa)
 {
 	namespace ublas = ::boost::numeric::ublas;
 	namespace ublasx = ::boost::numeric::ublasx;
@@ -553,20 +550,19 @@ bool spectral_anova(::boost::numeric::ublas::vector_expression<VectorT> const& x
 				RealT,
 				typename ublas::type_traits<typename ublas::vector_traits<VectorT>::value_type>::real_type
 			>::promote_type real_type;
-	typedef UIntT uint_type;
 	typedef ublas::vector<real_type> vector_type;
 
 	// The number of points used from the periodogram (default: 25)
-	//uint_type K = 25;
+	//std::size_t K = 25;
 	// The degree of the polynomial fitted to the periodogram (default: 2).
-	//uint_type d = 2;
+	//std::size_t d = 2;
 	//slope_protection_category slope_protection = SLOPE_PROTECTION_OFF;
 	real_type c1;	/* Normalising constant = C1(K,d) */
 	vector_type p(2*num_per_points); /* P[j] = I(j/n) (periodogram values) */
 	vector_type f(num_per_points);	/* f[j-1] = (4j-1)/(2n) */
 	vector_type l(num_per_points);	/* L[j] = log((P[2j-1]+P[2j])/2) */
 
-	::std::pair<real_type,uint_type> c1_k;
+	::std::pair<real_type,std::size_t> c1_k;
 	c1_k = lookup_periodogram_delta<real_type>(
 		num_per_points,
 		delta
@@ -578,7 +574,7 @@ bool spectral_anova(::boost::numeric::ublas::vector_expression<VectorT> const& x
 
 	size_type N = ublasx::size(x);
 
-	for (uint_type j = 1; j <= num_per_points; ++j)
+	for (std::size_t j = 1; j <= num_per_points; ++j)
 	{
 		f(j-1) = (4*j - 1) / (real_type(2) * N);
 	}
@@ -654,7 +650,7 @@ bool spectral_anova(::boost::numeric::ublas::vector_expression<VectorT> const& x
  * \brief Transient phase detector using Schruben test.
  *
  * \tparam RealT The type used for real numbers.
- * \tparam UIntT The type used for unsigned integral numbers.
+ * \tparam std::size_t The type used for unsigned integral numbers.
  *
  * This transient phase detection is based on methods described in
  *
@@ -668,11 +664,10 @@ bool spectral_anova(::boost::numeric::ublas::vector_expression<VectorT> const& x
  * \author Cosimo Anglano (cosimo.anglano@di.unipmn.it)
  * \author Marco Guazzone (marco.guazzone@gmail.com)
  */
-template <typename RealT, typename UIntT>
+template <typename RealT>
 class pawlikowski1990_transient_detector
 {
 	public: typedef RealT real_type;
-	public: typedef UIntT uint_type;
 	public: typedef ::std::size_t size_type;
 	public: typedef ::std::pair<real_type,real_type> sample_type;
 	public: typedef ::std::vector<sample_type> sample_container;
@@ -684,23 +679,23 @@ class pawlikowski1990_transient_detector
 	//Note: the use of a type-dependent value for representing the infinity
 	//constant is not a limitation to the simulation length since if we exceed
 	//that value the observation counter will overflow
-	//public: static const uint_type num_obs_infinity = 0;
-	public: static const uint_type num_obs_infinity; // = ::dcs::math::constants::infinity<uint_type>::value;
+	//public: static const std::size_t num_obs_infinity = 0;
+	public: static const std::size_t num_obs_infinity; // = ::dcs::math::constants::infinity<std::size_t>::value;
 
 
 	// Default values according to [Pawlikowski, 1990].
 
-	//public: static const uint_type default_n0_max = 50000;
-	public: static const uint_type default_n0_max;/// = num_obs_infinity;
-	public: static const uint_type default_max_heuristic_length;/// = default_n0_max/2;
-	public: static const uint_type default_min_num_mean_crossings = 25;
+	//public: static const std::size_t default_n0_max = 50000;
+	public: static const std::size_t default_n0_max;/// = num_obs_infinity;
+	public: static const std::size_t default_max_heuristic_length;/// = default_n0_max/2;
+	public: static const std::size_t default_min_num_mean_crossings = 25;
 	public: static const real_type default_gamma;// = 0.5;
 	public: static const real_type default_gamma_v;// = 2;
-	public: static const uint_type default_n_v = 100;
+	public: static const std::size_t default_n_v = 100;
 	public: static const real_type default_alpha_t;// = 0.05;
 	public: static const real_type default_safety_factor;// = 1;
-	public: static const uint_type default_n_ap = 25;
-	public: static const uint_type default_delta = 2;
+	public: static const std::size_t default_n_ap = 25;
+	public: static const std::size_t default_delta = 2;
 	public: static const real_type default_eps;// = 1e-5;
 	public: static const detail::slope_protection_category default_slope_protection = detail::SLOPE_PROTECTION_OFF;
 	//private: static const size_type initial_buf_size = 1024;
@@ -728,14 +723,14 @@ class pawlikowski1990_transient_detector
 	 *  Must be greater than 0.
 	 * \param eps The tolerance used for floating point comparisons.
 	 */
-	public: explicit pawlikowski1990_transient_detector(uint_type n0_max=default_n0_max,
+	public: explicit pawlikowski1990_transient_detector(std::size_t n0_max=default_n0_max,
 														real_type gamma=default_gamma,
 														real_type gamma_v=default_gamma_v,
-														uint_type n_v=default_n_v,
+														std::size_t n_v=default_n_v,
 														real_type alpha_t=default_alpha_t,
 														real_type safety_factor=default_safety_factor,
-														uint_type n_ap=default_n_ap,
-														uint_type delta=default_delta, 
+														std::size_t n_ap=default_n_ap,
+														std::size_t delta=default_delta, 
 														real_type eps = default_eps)
 		: num_obs_(0),
 		  detect_aborted_(false),
@@ -859,7 +854,7 @@ class pawlikowski1990_transient_detector
 			// observations just needed to detect the transient phase (i.e., to
 			// come here).
 
-			safe_num_obs_ = static_cast<uint_type>(safety_factor_*n0_star_);
+			safe_num_obs_ = static_cast<std::size_t>(safety_factor_*n0_star_);
 		}
 
 		//if ((n0_star_ > 0) && (num_obs_ >= safe_num_obs_))
@@ -920,7 +915,7 @@ class pawlikowski1990_transient_detector
 	 *
 	 * \deprecated Use estimated_size
 	 */
-	public: uint_type estimated_transient_length() const
+	public: std::size_t estimated_transient_length() const
 	{
 		// TODO
 		// What to do when the \c estimated_transient_length method is called
@@ -940,7 +935,7 @@ class pawlikowski1990_transient_detector
 	 * \note In order to get a meaningful value make sure to call this method
 	 *  only when method \c detected() returns \c true.
 	 */
-	public: uint_type estimated_size() const
+	public: std::size_t estimated_size() const
 	{
 		// TODO
 		// What to do when the \c estimated_transient_length method is called
@@ -966,7 +961,7 @@ class pawlikowski1990_transient_detector
 				 = gamma_n0_star_
 				 //= delta_n_
 				 = safe_num_obs_
-				 = uint_type(0);
+				 = std::size_t(0);
 
 		sum_ = real_type(0);
 
@@ -1028,7 +1023,7 @@ class pawlikowski1990_transient_detector
 
 		sum_ += value;
 		real_type mean = sum_/real_type(num_obs_);
-		uint_type num_crossings = 0;
+		std::size_t num_crossings = 0;
 		//for (size_type i = 1; i < num_buf_obs_ && num_crossings < min_num_mean_crossings_; ++i)
 		for (size_type i = 1; i < num_obs_ && num_crossings < min_num_mean_crossings_; ++i)
 		{
@@ -1053,9 +1048,9 @@ class pawlikowski1990_transient_detector
 			////n0_ = n0_star_ = num_crossings_;
 			n0_ = n0_star_ = num_obs_;
 			//n0_ = num_obs_;
-			//gamma_n0_star_ = uint_type(gamma_ * n0_star_);
-			gamma_n0_star_ = uint_type(gamma_ * n0_star_);
-			n_t_ = ::std::max(gamma_n0_star_, uint_type(gamma_v_ * n_v_));
+			//gamma_n0_star_ = std::size_t(gamma_ * n0_star_);
+			gamma_n0_star_ = std::size_t(gamma_ * n0_star_);
+			n_t_ = ::std::max(gamma_n0_star_, std::size_t(gamma_v_ * n_v_));
 			//delta_n_ = n_t_;
 			// clear and resize the buffer
 			obs_.resize(n_t_, false);
@@ -1079,7 +1074,7 @@ class pawlikowski1990_transient_detector
 			DCS_DEBUG_TRACE("Performing Schruben test on " << num_buf_obs_ << " observations");
 
 			real_type variance;
-			uint_type kappa;
+			std::size_t kappa;
 
 			// Estimates the variance
 			detail::spectral_anova(
@@ -1147,7 +1142,7 @@ class pawlikowski1990_transient_detector
 
 
 	/// Total number of observations since beginning.
-	private: uint_type num_obs_;
+	private: std::size_t num_obs_;
 	/// Tells if transient phase has been aborted.
 	private: bool detect_aborted_;
 	/// Tells if transient phase has been detected.
@@ -1155,17 +1150,17 @@ class pawlikowski1990_transient_detector
 
 	/* Used during heuristic phase: */
 	/// Minimum number of mean crossings for initial estimate.
-	private: /*const*/ uint_type min_num_mean_crossings_;
+	private: /*const*/ std::size_t min_num_mean_crossings_;
 	/// Sum of observations for initial estimate.
 	private: real_type sum_;
 	/// Initial estimate of transient length.
-	private: uint_type n0_star_; // useless (it seems)
+	private: std::size_t n0_star_; // useless (it seems)
 	/// Estimate of transient length.
-	private: uint_type n0_;
+	private: std::size_t n0_;
 	/// Maximum allowed number of observations during the whole transient phase.
-	private: /*const*/ uint_type n0_max_;
+	private: /*const*/ std::size_t n0_max_;
 	/// Maximum allowed number of observations during the heuristic phase.
-	private: /*const*/ uint_type max_heuristic_len_;
+	private: /*const*/ std::size_t max_heuristic_len_;
 
 	/* Used during both phases: */
 	/// Vector holding recent observations.
@@ -1175,7 +1170,7 @@ class pawlikowski1990_transient_detector
 //	/// Size of the buffer.
 //	private: size_type buf_size_;
 	/// Number of observations inserted in the buffer.
-	private: uint_type num_buf_obs_;
+	private: std::size_t num_buf_obs_;
 
 	/* Used during Schruben testing phase: */
 	/// Exchange factor for calculating step size between tests.
@@ -1185,51 +1180,51 @@ class pawlikowski1990_transient_detector
 	/// Significance level for stationarity test.
 	private: /*const*/ real_type alpha_t_;
 	/// Length of sequence used to estimate variance.
-	private: /*const*/ uint_type n_v_;
+	private: /*const*/ std::size_t n_v_;
 	/// Number of observations to test for stationarity.
-	private: uint_type n_t_;
+	private: std::size_t n_t_;
 	/// Step Length: Number of observations between stationarity tests.
-	private: uint_type gamma_n0_star_;
+	private: std::size_t gamma_n0_star_;
 	///// Additional number of observations to discard from the beginning of the
 	/// test sequence.
-	//private: uint_type delta_n_; // useless
+	//private: std::size_t delta_n_; // useless
 
 	/* Used during safety factor phase: */
 	/// Multiplier for estimated transient length.
 	private: /*const*/ real_type safety_factor_;
 	/// The maximum number of observations to collect before leaving the
 	/// transient phase.
-	private: uint_type safe_num_obs_;
-	private: /*const*/ uint_type n_ap_;
-	private: /*const*/ uint_type delta_;
+	private: std::size_t safe_num_obs_;
+	private: /*const*/ std::size_t n_ap_;
+	private: /*const*/ std::size_t delta_;
 	private: /*const*/ detail::slope_protection_category slope_protection_;
 	/// Tolerance for floating-point equality test.
 	private: /*const*/ real_type eps_;
 }; // pawlikowski1990_transient_detector
 
-template <typename RealT, typename UIntT>
-const RealT pawlikowski1990_transient_detector<RealT,UIntT>::default_gamma = RealT(0.5);
+template <typename RealT>
+const RealT pawlikowski1990_transient_detector<RealT>::default_gamma = RealT(0.5);
 
-template <typename RealT, typename UIntT>
-const RealT pawlikowski1990_transient_detector<RealT,UIntT>::default_gamma_v = RealT(2);
+template <typename RealT>
+const RealT pawlikowski1990_transient_detector<RealT>::default_gamma_v = RealT(2);
 
-template <typename RealT, typename UIntT>
-const RealT pawlikowski1990_transient_detector<RealT,UIntT>::default_alpha_t = RealT(0.05);
+template <typename RealT>
+const RealT pawlikowski1990_transient_detector<RealT>::default_alpha_t = RealT(0.05);
 
-template <typename RealT, typename UIntT>
-const RealT pawlikowski1990_transient_detector<RealT,UIntT>::default_safety_factor = RealT(1);
+template <typename RealT>
+const RealT pawlikowski1990_transient_detector<RealT>::default_safety_factor = RealT(1);
 
-template <typename RealT, typename UIntT>
-const RealT pawlikowski1990_transient_detector<RealT,UIntT>::default_eps = RealT(1e-5);
+template <typename RealT>
+const RealT pawlikowski1990_transient_detector<RealT>::default_eps = RealT(1e-5);
 
-template <typename RealT, typename UIntT>
-const UIntT pawlikowski1990_transient_detector<RealT,UIntT>::num_obs_infinity = ::dcs::math::constants::infinity<UIntT>::value;
+template <typename RealT>
+const std::size_t pawlikowski1990_transient_detector<RealT>::num_obs_infinity = ::dcs::math::constants::infinity<std::size_t>::value;
 
-template <typename RealT, typename UIntT>
-const UIntT pawlikowski1990_transient_detector<RealT,UIntT>::default_n0_max = pawlikowski1990_transient_detector<RealT,UIntT>::num_obs_infinity;
+template <typename RealT>
+const std::size_t pawlikowski1990_transient_detector<RealT>::default_n0_max = pawlikowski1990_transient_detector<RealT>::num_obs_infinity;
 
-template <typename RealT, typename UIntT>
-const UIntT pawlikowski1990_transient_detector<RealT,UIntT>::default_max_heuristic_length = pawlikowski1990_transient_detector<RealT,UIntT>::default_n0_max/2;
+template <typename RealT>
+const std::size_t pawlikowski1990_transient_detector<RealT>::default_max_heuristic_length = pawlikowski1990_transient_detector<RealT>::default_n0_max/2;
 
 }}} // Namespace dcs::des::spectral
 
