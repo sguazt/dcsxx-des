@@ -205,7 +205,7 @@ class any_analyzable_statistic
 	///@} AnalyzbleStatistic concept implementation
 
 
-	private: ::boost::shared_ptr< base_analyzable_statistic<value_type,std::size_t> > ptr_stat_;
+	private: ::boost::shared_ptr< base_analyzable_statistic<value_type> > ptr_stat_;
 };
 
 
