@@ -82,8 +82,9 @@ class quantile_estimator: public base_statistic<ValueT>
 			> accumulator_type;
 
 
-	public: explicit quantile_estimator(value_type p=0.5, value_type ci_level = base_type::default_confidence_level)
-	: base_type(ci_level, quantest_detail::make_name(p)),
+	public: explicit quantile_estimator(value_type p=0.5, value_type ci_level = base_type::default_confidence_level, std::string const& name = "Quantile")
+	//: base_type(ci_level, quantest_detail::make_name(p)),
+	: base_type(ci_level, name),
 	  acc_(::boost::accumulators::quantile_probability = p),
 	  p_(p)
 	{

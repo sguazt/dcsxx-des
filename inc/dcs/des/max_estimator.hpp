@@ -56,8 +56,8 @@ class max_estimator: public base_statistic<ValueT>
 	public: typedef max_statistic_category category_type;
 
 
-	public: explicit max_estimator(value_type ci_level = base_type::default_confidence_level)
-	: base_type(ci_level, "Max"),
+	public: explicit max_estimator(value_type ci_level = base_type::default_confidence_level, std::string const& name = "Max")
+	: base_type(ci_level, name),
 	  count_(0),
 	  m_(-::dcs::math::constants::infinity<value_type>::value)
 	{

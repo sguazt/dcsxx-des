@@ -56,8 +56,8 @@ class min_estimator: public base_statistic<ValueT>
 	public: typedef min_statistic_category category_type;
 
 
-	public: explicit min_estimator(value_type ci_level = base_type::default_confidence_level)
-	: base_type(ci_level, "Min"),
+	public: explicit min_estimator(value_type ci_level = base_type::default_confidence_level, std::string const& name = "Min")
+	: base_type(ci_level, name),
 	  count_(0),
 	  m_(::dcs::math::constants::infinity<value_type>::value)
 	{

@@ -77,8 +77,8 @@ class weighted_mean_estimator: public base_statistic<ValueT>
 	public: typedef mean_statistic_category category_type;
 
 
-	public: explicit weighted_mean_estimator(value_type ci_level = base_type::default_confidence_level)
-	: base_type(ci_level, "Weighted Mean"),
+	public: explicit weighted_mean_estimator(value_type ci_level = base_type::default_confidence_level, std::string const& name = "Weighted Mean")
+	: base_type(ci_level, name),
 	  count_(0),
 	  m_(0),
 	  s2_(0),

@@ -57,8 +57,8 @@ class mean_estimator: public base_statistic<ValueT>
 	public: typedef mean_statistic_category category_type;
 
 
-	public: explicit mean_estimator(value_type ci_level = base_type::default_confidence_level)
-	: base_type(ci_level, "Mean"),
+	public: explicit mean_estimator(value_type ci_level = base_type::default_confidence_level, std::string const& name = "Mean")
+	: base_type(ci_level, name),
 	  count_(0),
 	  m1_(0),
 	  m2_(0)
