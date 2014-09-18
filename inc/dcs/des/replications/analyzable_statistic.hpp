@@ -112,7 +112,7 @@ class analyzable_statistic: public base_analyzable_statistic<typename StatisticT
 		  repl_mean_stat_(),
 		  steady_start_time_(0)
 	{
-		// Empty
+		this->name(stat_.name());
 	}
 
 	/**
@@ -161,6 +161,8 @@ class analyzable_statistic: public base_analyzable_statistic<typename StatisticT
 			min_num_repl_ >= 2,
 			throw ::std::invalid_argument("[dcs::des::replications::analyzable_statistic::ctor] Number of replications must be >= 2.")
 		);
+
+		this->name(stat_.name());
 	}
 
 	/// Returns the current number of performed replications

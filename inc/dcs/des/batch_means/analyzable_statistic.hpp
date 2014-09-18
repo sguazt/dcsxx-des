@@ -101,6 +101,7 @@ class analyzable_statistic: public base_analyzable_statistic<typename StatisticT
 	  batch_size_(0),
 	  steady_start_time_(0)
 	{
+		this->name(stat_.name());
 	}
 
 
@@ -140,6 +141,7 @@ class analyzable_statistic: public base_analyzable_statistic<typename StatisticT
 	  batch_size_(0),
 	  steady_start_time_(0)
 	{
+		this->name(stat_.name());
 	}
 
 
@@ -569,12 +571,6 @@ class analyzable_statistic: public base_analyzable_statistic<typename StatisticT
 #endif // DCS_DEBUG
 			}
 		}
-	}
-
-
-	private: virtual ::std::string do_name() const
-	{
-		return stat_.name();
 	}
 
 
