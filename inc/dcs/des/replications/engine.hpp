@@ -231,7 +231,7 @@ class engine: public ::dcs::des::engine<RealT>
 		// NOTE: Current replication is done only when *all* of the monitored stats
 		//       are "complete".
 
-		bool replication_done(true);
+		bool replication_done = true;
 		const stat_iterator end_it = this->monitored_statistics().end();
 		for (
 			stat_iterator it = this->monitored_statistics().begin();
