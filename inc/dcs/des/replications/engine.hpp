@@ -234,11 +234,10 @@ class engine: public ::dcs::des::engine<RealT>
 
 		bool replication_done = true;
 		const stat_iterator end_it = this->monitored_statistics().end();
-		for (
-			stat_iterator it = this->monitored_statistics().begin();
-			it != end_it;
-			++it
-		) {
+		for (stat_iterator it = this->monitored_statistics().begin();
+			 it != end_it;
+			 ++it)
+		{
 			//boost::shared_ptr< base_analyzable_statistic<real_type> > ptr_stat(it->first);
 			boost::shared_ptr< base_analyzable_statistic<real_type> > ptr_stat(it->second.first);
 
@@ -365,6 +364,7 @@ class engine: public ::dcs::des::engine<RealT>
 			++repl_count_;
 
 			DCS_DEBUG_TRACE(">> Begin REPLICATION #" << repl_count_ << " - Simulation time: " << this->simulated_time() << " - Min Duration: " << min_repl_duration_);
+std::cerr << ">> BEGIN REPLICATION #" << repl_count_ << " - Simulation time: " << this->simulated_time() << " - Min Duration: " << min_repl_duration_ << std::endl;//XXX
 
 			prepare_replication(ctx);
 
@@ -395,7 +395,7 @@ class engine: public ::dcs::des::engine<RealT>
 				//if (end_of_repl_ && this->simulated_time() < min_repl_duration_)
 				if (end_of_repl_)
 				{
-					// Mkae sure to consume all concurrent events (i.e., events that fire now)
+					// Make sure to consume all concurrent events (i.e., events that fire now)
 					if (!this->future_event_list().empty())
 					{
 						if (this->future_event_list().top()->fire_time() == this->simulated_time())
@@ -442,6 +442,7 @@ class engine: public ::dcs::des::engine<RealT>
 				}
 			}
 
+std::cerr << ">> END REPLICATION #" << repl_count_ << " - Simulation time: " << this->simulated_time() << " - Min Duration: " << min_repl_duration_ << std::endl;//XXX
 			DCS_DEBUG_TRACE(">> End REPLICATION #" << repl_count_ << " - Simulation time: " << this->simulated_time());
 		}
 

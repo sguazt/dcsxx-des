@@ -215,7 +215,8 @@ class base_analyzable_statistic: public base_statistic<ValueT>
 
 	private: virtual ::std::ostream& do_print(::std::ostream& os) const
 	{
-		return os << this->estimate()
+		return os << this->name()
+				  << ": " << this->estimate()
 				  << " +/- " << this->standard_deviation()
 				  << " -- C.I. ("
 				  << (this->estimate()-this->half_width())
