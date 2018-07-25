@@ -1,3 +1,5 @@
+/* vim: set tabstop=4 expandtab shiftwidth=4 softtabstop=4: */
+
 /**
  * \file dcs/des/replications/banks2005_num_replications_detector.hpp
  *
@@ -10,7 +12,7 @@
  *   Prentice Hall, 2005
  * .
  *
- * Copyright (C) 2009-2012  Distributed Computing System (DCS) Group,
+ * Copyright (C) 2009       Distributed Computing System (DCS) Group,
  *                          Computer Science Institute,
  *                          Department of Science and Technological Innovation,
  *                          University of Piemonte Orientale,
@@ -116,7 +118,8 @@ class banks2005_num_replications_detector
 			return false;
 		}
 
-		const real_type half_alpha = (1-ci_level_)/2.0;
+		//const real_type half_alpha = (1-ci_level_)/2.0;
+		const real_type prob = (1+ci_level_)/2.0;
 
 		//real_type c = rel_prec_/(1+rel_prec_);
 
@@ -126,7 +129,8 @@ class banks2005_num_replications_detector
 			first_call_ = false;
 
 			::boost::math::normal_distribution<real_type> norm;
-			const real_type z = ::boost::math::quantile(norm, half_alpha);
+			//const real_type z = ::boost::math::quantile(norm, half_alpha);
+			const real_type z = ::boost::math::quantile(norm, prob);
 			r_ =  static_cast<std::size_t>(::dcs::math::sqr(z*stddev/(rel_prec_*estimate)));
 
 			if (r_ < r_min_)
@@ -141,7 +145,8 @@ class banks2005_num_replications_detector
 		do
 		{
 			::boost::math::students_t_distribution<real_type> student_t(r_-1);
-			const real_type t = ::boost::math::quantile(student_t, half_alpha);
+			//const real_type t = ::boost::math::quantile(student_t, half_alpha);
+			const real_type t = ::boost::math::quantile(student_t, prob);
 			r_want = ::dcs::math::sqr(t*stddev/(rel_prec_*estimate));
 
 			if (r_ < r_want)

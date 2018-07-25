@@ -29,7 +29,6 @@ dcs_log_init $logfile
 dcs_log_info $logfile "Starting configuration maker..."
 
 base_inc_dir=
-base_inc_dir=
 
 
 ## Sanity checks

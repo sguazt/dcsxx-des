@@ -1,9 +1,11 @@
+/* vim: set tabstop=4 expandtab shiftwidth=4 softtabstop=4: */
+
 /**
  * \file dcs/des/mean_estimator.hpp
  *
  * \brief Mean estimator for independent and identically distributed samples.
  *
- * Copyright (C) 2009-2012  Distributed Computing System (DCS) Group,
+ * Copyright (C) 2009       Distributed Computing System (DCS) Group,
  *                          Computer Science Institute,
  *                          Department of Science and Technological Innovation,
  *                          University of Piemonte Orientale,
@@ -91,13 +93,28 @@ class mean_estimator: public base_statistic<ValueT>
 
 	private: value_type do_half_width() const
 	{
+        // Compute the half-width of a two-tailed confidence interval
+        // Given a 100(1-\alpha)% confidence interval, the half-width is
+        // computed as:
+        //   h.w. = t_{1-\alpha/2,n-1}*S/\sqrt{n}
+        // where t_{1-\alpha/2,n-1} is the (1-\alpha/2) quantile of a Student's
+        // t distribution with (n-1) degrees of freedom
+
 		if (count_ > 1)
 		{
+            // NOTE: ci_level_ == 1-\alpha
+            //    -> t_{1-\alpha/2,n-1} == t_{1-(1-ci_level_)/2,n-1}
+            //                          == t_{(1+ci_level_)/2,n-1}
+
 			::dcs::math::stats::students_t_distribution<value_type> t_dist(count_-1);
 			value_type t = ::dcs::math::stats::quantile(t_dist, (value_type(1)+this->confidence_level())/value_type(2));
 
 			//return ::std::sqrt(this->variance()/count_)*t;
 			return t*(this->standard_deviation()/::std::sqrt(count_));
+		}
+		if (count_ == 1)
+		{
+			return 0;
 		}
 
 		//return value_type/*zero*/();
@@ -140,7 +157,9 @@ class mean_estimator: public base_statistic<ValueT>
 	{
 		return (count_ > 1)
 				? (m2_/value_type(count_-1))
-				: ::dcs::math::constants::infinity<value_type>::value;
+				: ((count_ == 1)
+				   ? 0
+				   : ::dcs::math::constants::infinity<value_type>::value);
 	}
 
 
